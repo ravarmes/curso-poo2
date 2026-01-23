@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.5 — ThreadPool</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --thread: #059669;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #d1fae5;
+            border-color: var(--thread);
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #d1fae5;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: #dc2626;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .ty {
+            color: #fdba74;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #94a3b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        /* Pool viz */
+        .pool-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+
+        .thread-pool {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .thread-worker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .thread-worker.busy {
+            background: #d1fae5;
+            border-color: var(--thread);
+        }
+
+        .worker-icon {
+            font-size: 1.2rem;
+        }
+
+        .worker-task {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .task-queue {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-item {
+            padding: 6px 12px;
+            background: #fef3c7;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.5 — ThreadPool e Executors</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="conceito">Conceito</button>
+            <button class="tab" data-key="tipos">Tipos de Pool</button>
+            <button class="tab" data-key="simulador">Simulador</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- Conceito -->
+        <section class="panel active" data-key="conceito">
+            <div class="box">
+                <h3>Por que usar ThreadPool?</h3>
+                <p>Criar threads é <strong>caro</strong>. Um ThreadPool reutiliza threads existentes para executar
+                    múltiplas tarefas.</p>
+
+                <div class="grid">
+                    <div>
+                        <h4>❌ Sem Pool:</h4>
+                        <pre><span class="cm">// Cria nova thread para cada tarefa</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="str">0</span>; i < <span class="str">1000</span>; i++) {
+    <span class="kw">new</span> <span class="ty">Thread</span>(() -> tarefa()).<span class="fn">start</span>();
+}
+<span class="cm">// 1000 threads criadas! 💀</span></pre>
+                    </div>
+                    <div>
+                        <h4>✅ Com Pool:</h4>
+                        <pre><span class="ty">ExecutorService</span> pool = 
+    <span class="ty">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="str">10</span>);
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="str">0</span>; i < <span class="str">1000</span>; i++) {
+    pool.<span class="fn">submit</span>(() -> tarefa());
+}
+<span class="cm">// Apenas 10 threads reutilizadas! ✨</span></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tipos -->
+        <section class="panel" data-key="tipos">
+            <div class="box">
+                <h3>Tipos de ThreadPool</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factory</th>
+                            <th>Comportamento</th>
+                            <th>Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>newFixedThreadPool(n)</code></td>
+                            <td>Exatamente n threads</td>
+                            <td>Carga previsível</td>
+                        </tr>
+                        <tr>
+                            <td><code>newCachedThreadPool()</code></td>
+                            <td>Cria threads sob demanda, remove ociosas</td>
+                            <td>Muitas tarefas curtas</td>
+                        </tr>
+                        <tr>
+                            <td><code>newSingleThreadExecutor()</code></td>
+                            <td>Apenas 1 thread</td>
+                            <td>Tarefas sequenciais</td>
+                        </tr>
+                        <tr>
+                            <td><code>newScheduledThreadPool(n)</code></td>
+                            <td>Tarefas agendadas/periódicas</td>
+                            <td>Timers, cron</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Ciclo de Vida:</h4>
+                <pre><span class="ty">ExecutorService</span> pool = <span class="ty">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="str">4</span>);
+
+pool.<span class="fn">submit</span>(() -> tarefa1());
+pool.<span class="fn">submit</span>(() -> tarefa2());
+
+pool.<span class="fn">shutdown</span>();  <span class="cm">// Não aceita novas, termina atuais</span>
+pool.<span class="fn">awaitTermination</span>(<span class="str">60</span>, <span class="ty">TimeUnit</span>.SECONDS);</pre>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador de ThreadPool</h3>
+
+                <div class="pool-container">
+                    <div>
+                        <h4>Thread Pool (3 threads)</h4>
+                        <div class="thread-pool" id="thread-pool">
+                            <div class="thread-worker" id="w0"><span class="worker-icon">🧵</span> Worker 0 <span
+                                    class="worker-task">idle</span></div>
+                            <div class="thread-worker" id="w1"><span class="worker-icon">🧵</span> Worker 1 <span
+                                    class="worker-task">idle</span></div>
+                            <div class="thread-worker" id="w2"><span class="worker-icon">🧵</span> Worker 2 <span
+                                    class="worker-task">idle</span></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Fila de Tarefas</h4>
+                        <div class="task-queue" id="task-queue"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px;">
+                    <button class="btn" id="add-task">+ Adicionar Tarefa</button>
+                    <button class="btn" id="add-many">+ Adicionar 5 Tarefas</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz — ThreadPool</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Simulador
+        let taskId = 0;
+        let queue = [];
+        let workers = [null, null, null];
+
+        function updateUI() {
+            document.getElementById('task-queue').innerHTML =
+                queue.map(t => `<div class="task-item">Tarefa #${t}</div>`).join('');
+
+            workers.forEach((task, i) => {
+                const el = document.getElementById('w' + i);
+                if (task) {
+                    el.classList.add('busy');
+                    el.querySelector('.worker-task').textContent = `Tarefa #${task}`;
+                } else {
+                    el.classList.remove('busy');
+                    el.querySelector('.worker-task').textContent = 'idle';
+                }
+            });
+        }
+
+        function processQueue() {
+            workers.forEach((task, i) => {
+                if (!task && queue.length > 0) {
+                    workers[i] = queue.shift();
+                    // Simula execução
+                    setTimeout(() => {
+                        workers[i] = null;
+                        updateUI();
+                        processQueue();
+                    }, 1000 + Math.random() * 1500);
+                }
+            });
+            updateUI();
+        }
+
+        document.getElementById('add-task').addEventListener('click', () => {
+            queue.push(++taskId);
+            processQueue();
+        });
+
+        document.getElementById('add-many').addEventListener('click', () => {
+            for (let i = 0; i < 5; i++) queue.push(++taskId);
+            processQueue();
+        });
+
+        // Quiz
+        const quizzes = [
+            { q: 'newFixedThreadPool(4) cria...', opts: ['4 threads fixas', '4 threads máximo, cresce sob demanda', 'Infinitas threads'], ans: 0 },
+            { q: 'pool.submit() faz...', opts: ['Cria nova thread', 'Adiciona tarefa à fila do pool', 'Espera tarefa terminar'], ans: 1 },
+            { q: 'shutdown() significa...', opts: ['Para imediatamente', 'Não aceita novas, termina atuais', 'Pausa todas'], ans: 1 },
+            { q: 'CachedThreadPool é melhor para...', opts: ['Tarefas longas', 'Muitas tarefas curtas', 'Tarefas agendadas'], ans: 1 },
+            { q: 'ExecutorService é uma...', opts: ['Classe', 'Interface', 'Annotation'], ans: 1 }
+        ];
+
+        document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `
+            <div class="box"><p><strong>${i + 1}.</strong> ${q.q}</p>
+            ${q.opts.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${o}</button>`).join('')}
+            <div class="feedback" id="qfb-${i}"></div></div>
+        `).join('');
+
+        document.querySelectorAll('#quiz-items .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.q), oi = parseInt(btn.dataset.o);
+                const fb = document.getElementById(`qfb-${qi}`);
+                fb.textContent = quizzes[qi].ans === oi ? 'Correto! ✅' : 'Incorreto.';
+                fb.className = 'feedback ' + (quizzes[qi].ans === oi ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>

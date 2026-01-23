@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 5.2 — Servidor TCP</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --socket: #0ea5e9;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #e0f2fe;
+            border-color: var(--socket);
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #e0f2fe;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: #dc2626;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .ty {
+            color: #fdba74;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #94a3b8;
+        }
+
+        /* Flow */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .flow-step.active {
+            background: #e0f2fe;
+            border-left: 4px solid var(--socket);
+        }
+
+        .step-num {
+            width: 30px;
+            height: 30px;
+            background: var(--socket);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 5.2 — Servidor TCP Básico</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="fluxo">Fluxo</button>
+            <button class="tab" data-key="codigo">Código Completo</button>
+            <button class="tab" data-key="classes">Classes Principais</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- Fluxo -->
+        <section class="panel active" data-key="fluxo">
+            <div class="box">
+                <h3>Ciclo de Vida do Servidor</h3>
+                <p class="note">Clique em cada etapa para ver o código:</p>
+
+                <div class="flow-steps">
+                    <div class="flow-step active" data-step="0">
+                        <div class="step-num">1</div>
+                        <div><strong>Criar ServerSocket</strong><br><span class="note">Abre porta para escuta</span>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="1">
+                        <div class="step-num">2</div>
+                        <div><strong>accept()</strong><br><span class="note">Bloqueia até cliente conectar</span></div>
+                    </div>
+                    <div class="flow-step" data-step="2">
+                        <div class="step-num">3</div>
+                        <div><strong>Obter Streams</strong><br><span class="note">InputStream e OutputStream</span>
+                        </div>
+                    </div>
+                    <div class="flow-step" data-step="3">
+                        <div class="step-num">4</div>
+                        <div><strong>Ler/Escrever</strong><br><span class="note">Comunicação com cliente</span></div>
+                    </div>
+                    <div class="flow-step" data-step="4">
+                        <div class="step-num">5</div>
+                        <div><strong>Fechar Conexão</strong><br><span class="note">socket.close()</span></div>
+                    </div>
+                </div>
+
+                <pre id="step-code"><span class="cm">// 1. Criar ServerSocket na porta 12345</span>
+<span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>);
+System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardando na porta 12345..."</span>);</pre>
+            </div>
+        </section>
+
+        <!-- Código -->
+        <section class="panel" data-key="codigo">
+            <div class="box">
+                <h3>Servidor Echo Completo</h3>
+
+                <pre><span class="kw">import</span> java.io.*;
+<span class="kw">import</span> java.net.*;
+
+<span class="kw">public class</span> <span class="ty">ServidorEcho</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="kw">try</span> (<span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>)) {
+            System.out.<span class="fn">println</span>(<span class="str">"Servidor iniciado na porta 12345"</span>);
+            
+            <span class="kw">while</span> (<span class="kw">true</span>) {
+                <span class="cm">// Espera conexão</span>
+                <span class="ty">Socket</span> cliente = server.<span class="fn">accept</span>();
+                System.out.<span class="fn">println</span>(<span class="str">"Cliente conectado: "</span> + 
+                    cliente.<span class="fn">getInetAddress</span>());
+                
+                <span class="cm">// Streams para comunicação</span>
+                <span class="ty">BufferedReader</span> in = <span class="kw">new</span> <span class="ty">BufferedReader</span>(
+                    <span class="kw">new</span> <span class="ty">InputStreamReader</span>(cliente.<span class="fn">getInputStream</span>()));
+                <span class="ty">PrintWriter</span> out = <span class="kw">new</span> <span class="ty">PrintWriter</span>(
+                    cliente.<span class="fn">getOutputStream</span>(), <span class="kw">true</span>);
+                
+                <span class="cm">// Echo: reenvia o que recebeu</span>
+                <span class="ty">String</span> msg;
+                <span class="kw">while</span> ((msg = in.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
+                    System.out.<span class="fn">println</span>(<span class="str">"Recebido: "</span> + msg);
+                    out.<span class="fn">println</span>(<span class="str">"Echo: "</span> + msg);
+                }
+                
+                cliente.<span class="fn">close</span>();
+            }
+        } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
+            e.<span class="fn">printStackTrace</span>();
+        }
+    }
+}</pre>
+            </div>
+        </section>
+
+        <!-- Classes -->
+        <section class="panel" data-key="classes">
+            <div class="box">
+                <h3>Classes Principais</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Classe</th>
+                            <th>Função</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>ServerSocket</code></td>
+                            <td>Escuta em uma porta, aceita conexões</td>
+                        </tr>
+                        <tr>
+                            <td><code>Socket</code></td>
+                            <td>Representa conexão com cliente</td>
+                        </tr>
+                        <tr>
+                            <td><code>InputStream</code></td>
+                            <td>Lê bytes do cliente</td>
+                        </tr>
+                        <tr>
+                            <td><code>OutputStream</code></td>
+                            <td>Envia bytes para cliente</td>
+                        </tr>
+                        <tr>
+                            <td><code>BufferedReader</code></td>
+                            <td>Lê linhas de texto (wrapper)</td>
+                        </tr>
+                        <tr>
+                            <td><code>PrintWriter</code></td>
+                            <td>Escreve linhas de texto (wrapper)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz — Servidor TCP</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Flow steps
+        const stepCodes = [
+            `<span class="cm">// 1. Criar ServerSocket na porta 12345</span>
+<span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>);
+System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardando..."</span>);`,
+            `<span class="cm">// 2. Esperar conexão (bloqueia)</span>
+<span class="ty">Socket</span> cliente = server.<span class="fn">accept</span>();
+<span class="cm">// Só continua quando cliente conectar!</span>`,
+            `<span class="cm">// 3. Obter streams de entrada e saída</span>
+<span class="ty">InputStream</span> is = cliente.<span class="fn">getInputStream</span>();
+<span class="ty">OutputStream</span> os = cliente.<span class="fn">getOutputStream</span>();
+
+<span class="cm">// Com wrappers para texto:</span>
+<span class="ty">BufferedReader</span> in = <span class="kw">new</span> <span class="ty">BufferedReader</span>(<span class="kw">new</span> <span class="ty">InputStreamReader</span>(is));
+<span class="ty">PrintWriter</span> out = <span class="kw">new</span> <span class="ty">PrintWriter</span>(os, <span class="kw">true</span>);`,
+            `<span class="cm">// 4. Ler e escrever</span>
+<span class="ty">String</span> msg = in.<span class="fn">readLine</span>();  <span class="cm">// Lê linha do cliente</span>
+out.<span class="fn">println</span>(<span class="str">"Resposta"</span>);   <span class="cm">// Envia para cliente</span>`,
+            `<span class="cm">// 5. Fechar conexão</span>
+cliente.<span class="fn">close</span>();
+server.<span class="fn">close</span>();  <span class="cm">// Quando terminar</span>`
+        ];
+
+        document.querySelectorAll('.flow-step').forEach(step => {
+            step.addEventListener('click', () => {
+                document.querySelectorAll('.flow-step').forEach(s => s.classList.remove('active'));
+                step.classList.add('active');
+                document.getElementById('step-code').innerHTML = stepCodes[step.dataset.step];
+            });
+        });
+
+        // Quiz
+        const quizzes = [
+            { q: 'ServerSocket é usado pelo...', opts: ['Cliente', 'Servidor', 'Ambos'], ans: 1 },
+            { q: 'accept() retorna...', opts: ['void', 'Socket do cliente', 'String'], ans: 1 },
+            { q: 'Para ler texto linha a linha, usamos...', opts: ['InputStream', 'BufferedReader', 'DataInputStream'], ans: 1 },
+            { q: 'PrintWriter com autoflush=true...', opts: ['Fecha automaticamente', 'Envia imediatamente após println', 'Compacta dados'], ans: 1 },
+            { q: 'Se accept() não foi chamado, clientes...', opts: ['Conectam normalmente', 'Recebem erro de conexão', 'Entram em fila'], ans: 2 }
+        ];
+
+        document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `
+            <div class="box"><p><strong>${i + 1}.</strong> ${q.q}</p>
+            ${q.opts.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${o}</button>`).join('')}
+            <div class="feedback" id="qfb-${i}"></div></div>
+        `).join('');
+
+        document.querySelectorAll('#quiz-items .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.q), oi = parseInt(btn.dataset.o);
+                const fb = document.getElementById(`qfb-${qi}`);
+                fb.textContent = quizzes[qi].ans === oi ? 'Correto! ✅' : 'Incorreto.';
+                fb.className = 'feedback ' + (quizzes[qi].ans === oi ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>
