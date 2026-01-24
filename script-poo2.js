@@ -807,6 +807,97 @@ function wireVideosPanel(panelEl) {
   });
 }
 
+const githubReposByChapterId = {
+  "cap-1": [
+    { name: "javafx-introducao", url: "https://github.com/ravarmes/javafx-introducao" },
+  ],
+  "cap-2": [
+    { name: "jdbc-dao-java", url: "https://github.com/ravarmes/jdbc-dao-java" },
+    { name: "jdbc-exemplos-java", url: "https://github.com/ravarmes/jdbc-exemplos-java" },
+  ],
+  "cap-3": [
+    { name: "javafx-crud-mvc", url: "https://github.com/ravarmes/javafx-crud-mvc" },
+  ],
+  "cap-4": [
+    {
+      group: "Introdução",
+      repos: [
+        { name: "threads-extendsthread-java", url: "https://github.com/ravarmes/threads-extendsthread-java" },
+        { name: "threads-implementsrunnable-java", url: "https://github.com/ravarmes/threads-implementsrunnable-java" },
+        { name: "threads-multithreadingcontadoras-java", url: "https://github.com/ravarmes/threads-multithreadingcontadoras-java" },
+        { name: "threads-processadores-java", url: "https://github.com/ravarmes/threads-processadores-java" },
+      ],
+    },
+    {
+      group: "Métodos Importantes",
+      repos: [
+        { name: "threads-join-java", url: "https://github.com/ravarmes/threads-join-java" },
+        { name: "threads-yield-java", url: "https://github.com/ravarmes/threads-yield-java" },
+        { name: "threads-sleep-java", url: "https://github.com/ravarmes/threads-sleep-java" },
+      ],
+    },
+    {
+      group: "Sincronização de Threads",
+      repos: [
+        { name: "threads-synchronized1iphone-java", url: "https://github.com/ravarmes/threads-synchronized1iphone-java" },
+        { name: "threads-synchronized2iphone-java", url: "https://github.com/ravarmes/threads-synchronized2iphone-java" },
+        { name: "threads-waitnotifypedestal-java", url: "https://github.com/ravarmes/threads-waitnotifypedestal-java" },
+        { name: "threads-deadlock-java", url: "https://github.com/ravarmes/threads-deadlock-java" },
+      ],
+    },
+    {
+      group: "Multithreading com GUI",
+      repos: [
+        { name: "threads-contadoras-javafx", url: "https://github.com/ravarmes/threads-contadoras-javafx" },
+        { name: "threads-paresimpares-javafx", url: "https://github.com/ravarmes/threads-paresimpares-javafx" },
+        { name: "threads-primosperfeitos-javafx", url: "https://github.com/ravarmes/threads-primosperfeitos-javafx" },
+        { name: "threads-multithreadingtabela-javafx", url: "https://github.com/ravarmes/threads-multithreadingtabela-javafx" },
+        { name: "threads-yieldsleepjoin-javafx", url: "https://github.com/ravarmes/threads-yieldsleepjoin-javafx" },
+        { name: "threads-corridacavalos-javafx", url: "https://github.com/ravarmes/threads-corridacavalos-javafx" },
+        { name: "threads-corridacavalosclassificacao-javafx", url: "https://github.com/ravarmes/threads-corridacavalosclassificacao-javafx" },
+      ],
+    },
+  ],
+  "cap-5": [
+    { name: "sockets-clienteservidor-java", url: "https://github.com/ravarmes/sockets-clienteservidor-java" },
+    { name: "sockets-primos-javafx", url: "https://github.com/ravarmes/sockets-primos-javafx" },
+    { name: "sockets-jogodavelha-javafx", url: "https://github.com/ravarmes/sockets-jogodavelha-javafx" },
+    { name: "sockets-chatreservado-javafx", url: "https://github.com/ravarmes/sockets-chatreservado-javafx" },
+  ],
+};
+
+function renderGitHubPanel(chapter) {
+  const model = chapter.githubRepos || githubReposByChapterId[chapter.id] || [];
+  const isGrouped = Array.isArray(model) && model.length > 0 && typeof model[0] === "object" && "group" in model[0];
+
+  const renderRepoList = (repos) => `
+    <ul class="gh-repo-list">
+      ${repos.map((r) => `
+        <li class="gh-repo">
+          <a class="gh-repo-link" href="${r.url}" target="_blank" rel="noopener">${r.name}</a>
+        </li>
+      `).join("")}
+    </ul>
+  `;
+
+  const items = model.length
+    ? `
+      ${isGrouped
+        ? model.map((g) => `
+            <h4 class="gh-repo-group">${g.group}</h4>
+            ${renderRepoList(g.repos || [])}
+          `).join("")
+        : renderRepoList(model)}
+    `
+    : "<p>Sem repositórios cadastrados para este capítulo.</p>";
+
+  return `
+    <h3>GitHub</h3>
+    <p>Repositórios de exemplos usados neste capítulo.</p>
+    ${items}
+  `;
+}
+
 function renderChapter(chapterId) {
   const chapter = chapters.find((c) => c.id === chapterId) || chapters[0];
   titleEl.textContent = chapter.fullTitle || chapter.title;
@@ -824,6 +915,7 @@ function renderChapter(chapterId) {
     { key: "videos", label: "Vídeos" },
     { key: "exercises", label: "Exercícios" },
     { key: "practices", label: "Práticas" },
+    { key: "github", label: "GitHub" },
   ];
 
   const toolbar = document.createElement("div");
@@ -901,6 +993,8 @@ function renderChapter(chapterId) {
     } else if (key === "slides") {
       p.innerHTML = chapter.slides || "<p>Sem slides disponíveis.</p>";
       wireSlidesPanel(p);
+    } else if (key === "github") {
+      p.innerHTML = renderGitHubPanel(chapter);
     }
 
     panels.appendChild(p);
