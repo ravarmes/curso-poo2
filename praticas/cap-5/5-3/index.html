@@ -181,12 +181,12 @@
 
 <body>
     <main>
-        <h2>Práticas 5.3 — Cliente TCP</h2>
+        <h2>Práticas 5.3 — Cliente TCP com DataInputStream/DataOutputStream</h2>
 
         <div class="tabs">
             <button class="tab active" data-key="codigo">Código</button>
             <button class="tab" data-key="simulador">Simulador</button>
-            <button class="tab" data-key="dicas">Dicas</button>
+            <button class="tab" data-key="envioObjetos">Envio de Objetos</button>
             <button class="tab" data-key="quiz">Quiz</button>
         </div>
 
@@ -198,35 +198,39 @@
                 <pre><span class="kw">import</span> java.io.*;
 <span class="kw">import</span> java.net.*;
 
-<span class="kw">public class</span> <span class="ty">ClienteTCP</span> {
+<span class="kw">public class</span> <span class="ty">Cliente</span> {
     <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
-        <span class="ty">String</span> host = <span class="str">"localhost"</span>;
-        <span class="kw">int</span> porta = <span class="str">12345</span>;
-        
-        <span class="kw">try</span> (<span class="ty">Socket</span> socket = <span class="kw">new</span> <span class="ty">Socket</span>(host, porta)) {
+        <span class="kw">try</span> {
+            <span class="cm">// Conecta ao servidor</span>
+            <span class="ty">Socket</span> socket = <span class="kw">new</span> <span class="ty">Socket</span>(<span class="str">"127.0.0.1"</span>, <span class="str">54321</span>);
             System.out.<span class="fn">println</span>(<span class="str">"Conectado ao servidor!"</span>);
             
-            <span class="cm">// Streams</span>
-            <span class="ty">BufferedReader</span> in = <span class="kw">new</span> <span class="ty">BufferedReader</span>(
-                <span class="kw">new</span> <span class="ty">InputStreamReader</span>(socket.<span class="fn">getInputStream</span>()));
-            <span class="ty">PrintWriter</span> out = <span class="kw">new</span> <span class="ty">PrintWriter</span>(
-                socket.<span class="fn">getOutputStream</span>(), <span class="kw">true</span>);
+            <span class="cm">// Obtém streams</span>
+            <span class="ty">DataOutputStream</span> saida = <span class="kw">new</span> <span class="ty">DataOutputStream</span>(
+                socket.<span class="fn">getOutputStream</span>());
+            <span class="ty">DataInputStream</span> entrada = <span class="kw">new</span> <span class="ty">DataInputStream</span>(
+                socket.<span class="fn">getInputStream</span>());
             
-            <span class="cm">// Entrada do teclado</span>
-            <span class="ty">BufferedReader</span> teclado = <span class="kw">new</span> <span class="ty">BufferedReader</span>(
-                <span class="kw">new</span> <span class="ty">InputStreamReader</span>(System.in));
+            <span class="cm">// Envia mensagem</span>
+            saida.<span class="fn">writeUTF</span>(<span class="str">"Olá, servidor!"</span>);
             
-            <span class="ty">String</span> msg;
-            <span class="kw">while</span> ((msg = teclado.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
-                out.<span class="fn">println</span>(msg);  <span class="cm">// Envia para servidor</span>
-                <span class="ty">String</span> resposta = in.<span class="fn">readLine</span>();  <span class="cm">// Recebe resposta</span>
-                System.out.<span class="fn">println</span>(<span class="str">"Servidor: "</span> + resposta);
-            }
+            <span class="cm">// Lê resposta</span>
+            <span class="ty">String</span> resposta = entrada.<span class="fn">readUTF</span>();
+            System.out.<span class="fn">println</span>(<span class="str">"Resposta: "</span> + resposta);
+            
+            <span class="cm">// Fecha conexão</span>
+            socket.<span class="fn">close</span>();
+            
         } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
-            System.err.<span class="fn">println</span>(<span class="str">"Erro: "</span> + e.<span class="fn">getMessage</span>());
+            e.<span class="fn">printStackTrace</span>();
         }
     }
 }</pre>
+
+                <div class="box" style="background:#e0f2fe;border-color:var(--socket);">
+                    <strong>💡 Dica:</strong> Sempre feche o socket quando terminar para liberar recursos do sistema
+                    operacional.
+                </div>
             </div>
         </section>
 
@@ -247,35 +251,45 @@
                     <div class="chat-container">
                         <h4>🖥️ Servidor (Echo)</h4>
                         <div class="chat-messages" id="server-msgs"></div>
-                        <p class="note">Servidor responde automaticamente</p>
+                        <p class="note">Servidor converte para maiúsculo e responde</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Dicas -->
-        <section class="panel" data-key="dicas">
+        <!-- Envio de Objetos -->
+        <section class="panel" data-key="envioObjetos">
             <div class="box">
-                <h3>Dicas e Boas Práticas</h3>
+                <h3>Envio de Objetos Serializáveis</h3>
 
-                <h4>⚠️ Tratamento de Erros:</h4>
-                <pre><span class="kw">try</span> {
-    <span class="ty">Socket</span> socket = <span class="kw">new</span> <span class="ty">Socket</span>(host, porta);
-} <span class="kw">catch</span> (<span class="ty">UnknownHostException</span> e) {
-    <span class="cm">// Host não encontrado</span>
-} <span class="kw">catch</span> (<span class="ty">ConnectException</span> e) {
-    <span class="cm">// Servidor não está rodando</span>
-} <span class="kw">catch</span> (<span class="ty">SocketTimeoutException</span> e) {
-    <span class="cm">// Timeout de conexão</span>
+                <h4>1. Criar classe Serializable:</h4>
+                <pre><span class="kw">import</span> java.io.<span class="ty">Serializable</span>;
+
+<span class="kw">public class</span> <span class="ty">Pessoa</span> <span class="kw">implements</span> <span class="ty">Serializable</span> {
+    <span class="kw">private</span> <span class="ty">String</span> nome;
+    <span class="kw">private int</span> idade;
+    
+    <span class="kw">public</span> <span class="ty">Pessoa</span>(<span class="ty">String</span> nome, <span class="kw">int</span> idade) {
+        <span class="kw">this</span>.nome = nome;
+        <span class="kw">this</span>.idade = idade;
+    }
+    
+    <span class="cm">// getters...</span>
 }</pre>
 
-                <h4>⏱️ Definir Timeout:</h4>
-                <pre>socket.<span class="fn">setSoTimeout</span>(<span class="str">5000</span>);  <span class="cm">// 5 segundos</span></pre>
+                <h4>2. Cliente envia objeto:</h4>
+                <pre><span class="ty">ObjectOutputStream</span> saida = <span class="kw">new</span> <span class="ty">ObjectOutputStream</span>(
+    socket.<span class="fn">getOutputStream</span>());
 
-                <h4>🔄 Try-with-resources:</h4>
-                <pre><span class="kw">try</span> (<span class="ty">Socket</span> socket = <span class="kw">new</span> <span class="ty">Socket</span>(host, porta)) {
-    <span class="cm">// Socket fecha automaticamente!</span>
-}</pre>
+<span class="ty">Pessoa</span> p = <span class="kw">new</span> <span class="ty">Pessoa</span>(<span class="str">"Rafael Vargas"</span>, <span class="str">38</span>);
+saida.<span class="fn">writeObject</span>(p);</pre>
+
+                <h4>3. Servidor recebe objeto:</h4>
+                <pre><span class="ty">ObjectInputStream</span> entrada = <span class="kw">new</span> <span class="ty">ObjectInputStream</span>(
+    socket.<span class="fn">getInputStream</span>());
+
+<span class="ty">Pessoa</span> p = (<span class="ty">Pessoa</span>) entrada.<span class="fn">readObject</span>();
+System.out.<span class="fn">println</span>(<span class="str">"Nome: "</span> + p.<span class="fn">getNome</span>());</pre>
             </div>
         </section>
 
@@ -316,10 +330,10 @@
             addMsg(clientMsgs, msg, 'sent');
             addMsg(serverMsgs, 'Recebido: ' + msg, 'received');
 
-            // Simula resposta do servidor
+            // Simula resposta do servidor (toUpperCase)
             setTimeout(() => {
-                const response = 'Echo: ' + msg;
-                addMsg(serverMsgs, response, 'sent');
+                const response = msg.toUpperCase();
+                addMsg(serverMsgs, 'Enviando: ' + response, 'sent');
                 addMsg(clientMsgs, response, 'received');
             }, 300);
 
@@ -331,10 +345,10 @@
         // Quiz
         const quizzes = [
             { q: 'Para conectar ao servidor, cliente usa...', opts: ['ServerSocket', 'Socket', 'DatagramSocket'], ans: 1 },
-            { q: 'new Socket("localhost", 8080) faz...', opts: ['Abre porta 8080', 'Conecta ao servidor na porta 8080', 'Cria servidor'], ans: 1 },
-            { q: 'ConnectException ocorre quando...', opts: ['Dados inválidos', 'Servidor não está rodando', 'Porta ocupada'], ans: 1 },
-            { q: 'setSoTimeout define...', opts: ['Tamanho do buffer', 'Tempo máximo de espera', 'Porta alternativa'], ans: 1 },
-            { q: 'try-with-resources garante...', opts: ['Reconexão automática', 'Fechamento automático', 'Múltiplas conexões'], ans: 1 }
+            { q: 'new Socket("localhost", 8080) conecta...', opts: ['Na porta 8080 do servidor local', 'Cria um servidor', 'Abre arquivo'], ans: 0 },
+            { q: 'ObjectOutputStream.writeObject() envia...', opts: ['Apenas strings', 'Qualquer objeto Serializable', 'Bytes brutos'], ans: 1 },
+            { q: 'Para receber objeto, usamos...', opts: ['readUTF()', 'readObject()', 'readLine()'], ans: 1 },
+            { q: 'Uma classe deve implementar __ para ser enviada por ObjectOutputStream', opts: ['Runnable', 'Serializable', 'Comparable'], ans: 1 }
         ];
 
         document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `

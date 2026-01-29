@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 4.6 — DCL: Permissões</title>
+    <title>Exercícios 4.6 — Deadlock</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,28 @@
 
 <body>
     <main>
-        <h3>Exercícios 4.6 — DCL: Usuários, Papéis e Permissões</h3>
+        <h3>Exercícios 4.6 — Deadlock</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Qual comando concede permissões a um usuário ou papel?",
-                options: ["REVOKE", "GRANT ... TO", "CREATE USER"],
+                prompt: "O que é deadlock (impasse)?",
+                options: ["Quando uma thread executa muito rápido", "Quando threads esperam uma pela outra indefinidamente, bloqueando a execução", "Quando uma thread termina com erro"],
                 answerIndex: 1,
-                explanation: "GRANT SELECT, INSERT ON tabela TO usuario concede permissões. REVOKE remove permissões."
+                explanation: "Deadlock ocorre quando duas ou mais threads ficam bloqueadas esperando recursos que uma segura e a outra precisa, e vice-versa."
             },
             {
-                prompt: "O que é um ROLE (papel) em SQL?",
-                options: ["Uma tabela especial", "Grupo de permissões reutilizável atribuído a usuários", "Um tipo de índice"],
+                prompt: "No cenário clássico de deadlock, Thread A possui Lock1 e quer Lock2, enquanto Thread B...",
+                options: ["Também quer Lock1", "Possui Lock2 e quer Lock1", "Não usa nenhum lock"],
                 answerIndex: 1,
-                explanation: "ROLE agrupa permissões (ex: bibliotecario). Atribui-se o role a usuários via GRANT role TO usuario."
+                explanation: "Este é o cenário clássico: A tem Lock1 e quer Lock2, B tem Lock2 e quer Lock1. Ambas ficam bloqueadas indefinidamente."
             },
             {
-                prompt: "REVOKE DELETE ON Aluno FROM estagiario faz o quê?",
-                options: ["Concede DELETE ao estagiario", "Remove a permissão DELETE do estagiario", "Exclui o usuário estagiario"],
+                prompt: "Como evitar deadlocks?",
+                options: ["Usar mais threads", "Adquirir locks sempre na mesma ordem e evitar segurar múltiplos locks por muito tempo", "Nunca usar synchronized"],
                 answerIndex: 1,
-                explanation: "REVOKE remove permissões específicas. O usuário continua existindo, mas perde o privilégio DELETE."
+                explanation: "Manter uma ordem consistente ao adquirir recursos e minimizar o tempo segurando múltiplos locks ajuda a evitar deadlocks."
             }
         ];
 

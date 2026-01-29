@@ -159,91 +159,152 @@
             justify-content: center;
             font-weight: bold;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
     </style>
 </head>
 
 <body>
     <main>
-        <h2>Práticas 5.2 — Servidor TCP Básico</h2>
+        <h2>Práticas 5.2 — Servidor TCP com DataInputStream/DataOutputStream</h2>
 
         <div class="tabs">
             <button class="tab active" data-key="fluxo">Fluxo</button>
-            <button class="tab" data-key="codigo">Código Completo</button>
-            <button class="tab" data-key="classes">Classes Principais</button>
+            <button class="tab" data-key="servidor">Servidor</button>
+            <button class="tab" data-key="cliente">Cliente</button>
+            <button class="tab" data-key="classes">Classes</button>
             <button class="tab" data-key="quiz">Quiz</button>
         </div>
 
         <!-- Fluxo -->
         <section class="panel active" data-key="fluxo">
             <div class="box">
-                <h3>Ciclo de Vida do Servidor</h3>
-                <p class="note">Clique em cada etapa para ver o código:</p>
+                <h3>Fluxo de Comunicação TCP</h3>
+                <p class="note">Clique em cada etapa para ver o código correspondente:</p>
 
                 <div class="flow-steps">
                     <div class="flow-step active" data-step="0">
                         <div class="step-num">1</div>
-                        <div><strong>Criar ServerSocket</strong><br><span class="note">Abre porta para escuta</span>
-                        </div>
+                        <div><strong>Servidor: Criar ServerSocket</strong><br><span class="note">Abre porta para
+                                escuta</span></div>
                     </div>
                     <div class="flow-step" data-step="1">
                         <div class="step-num">2</div>
-                        <div><strong>accept()</strong><br><span class="note">Bloqueia até cliente conectar</span></div>
+                        <div><strong>Servidor: accept()</strong><br><span class="note">Bloqueia até cliente
+                                conectar</span></div>
                     </div>
                     <div class="flow-step" data-step="2">
                         <div class="step-num">3</div>
-                        <div><strong>Obter Streams</strong><br><span class="note">InputStream e OutputStream</span>
+                        <div><strong>Cliente: Criar Socket</strong><br><span class="note">Conecta ao servidor</span>
                         </div>
                     </div>
                     <div class="flow-step" data-step="3">
                         <div class="step-num">4</div>
-                        <div><strong>Ler/Escrever</strong><br><span class="note">Comunicação com cliente</span></div>
+                        <div><strong>Obter Streams</strong><br><span class="note">DataInputStream e
+                                DataOutputStream</span></div>
                     </div>
                     <div class="flow-step" data-step="4">
                         <div class="step-num">5</div>
-                        <div><strong>Fechar Conexão</strong><br><span class="note">socket.close()</span></div>
+                        <div><strong>Comunicação</strong><br><span class="note">writeUTF() e readUTF()</span></div>
                     </div>
                 </div>
 
-                <pre id="step-code"><span class="cm">// 1. Criar ServerSocket na porta 12345</span>
-<span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>);
-System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardando na porta 12345..."</span>);</pre>
+                <pre id="step-code"><span class="cm">// 1. Servidor: Criar ServerSocket na porta 54321</span>
+<span class="ty">ServerSocket</span> servidorSocket = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">54321</span>);
+System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardando conexões..."</span>);</pre>
             </div>
         </section>
 
-        <!-- Código -->
-        <section class="panel" data-key="codigo">
+        <!-- Servidor -->
+        <section class="panel" data-key="servidor">
             <div class="box">
-                <h3>Servidor Echo Completo</h3>
+                <h3>Código do Servidor (conforme Código 5.2 do livro)</h3>
 
                 <pre><span class="kw">import</span> java.io.*;
 <span class="kw">import</span> java.net.*;
 
-<span class="kw">public class</span> <span class="ty">ServidorEcho</span> {
+<span class="kw">public class</span> <span class="ty">Servidor</span> {
     <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
-        <span class="kw">try</span> (<span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>)) {
-            System.out.<span class="fn">println</span>(<span class="str">"Servidor iniciado na porta 12345"</span>);
+        <span class="kw">try</span> {
+            <span class="cm">// Cria ServerSocket na porta 54321</span>
+            <span class="ty">ServerSocket</span> servidorSocket = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">54321</span>);
+            System.out.<span class="fn">println</span>(<span class="str">"Aguardando conexão..."</span>);
             
-            <span class="kw">while</span> (<span class="kw">true</span>) {
-                <span class="cm">// Espera conexão</span>
-                <span class="ty">Socket</span> cliente = server.<span class="fn">accept</span>();
-                System.out.<span class="fn">println</span>(<span class="str">"Cliente conectado: "</span> + 
-                    cliente.<span class="fn">getInetAddress</span>());
-                
-                <span class="cm">// Streams para comunicação</span>
-                <span class="ty">BufferedReader</span> in = <span class="kw">new</span> <span class="ty">BufferedReader</span>(
-                    <span class="kw">new</span> <span class="ty">InputStreamReader</span>(cliente.<span class="fn">getInputStream</span>()));
-                <span class="ty">PrintWriter</span> out = <span class="kw">new</span> <span class="ty">PrintWriter</span>(
-                    cliente.<span class="fn">getOutputStream</span>(), <span class="kw">true</span>);
-                
-                <span class="cm">// Echo: reenvia o que recebeu</span>
-                <span class="ty">String</span> msg;
-                <span class="kw">while</span> ((msg = in.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
-                    System.out.<span class="fn">println</span>(<span class="str">"Recebido: "</span> + msg);
-                    out.<span class="fn">println</span>(<span class="str">"Echo: "</span> + msg);
-                }
-                
-                cliente.<span class="fn">close</span>();
-            }
+            <span class="cm">// Aceita conexão do cliente</span>
+            <span class="ty">Socket</span> socket = servidorSocket.<span class="fn">accept</span>();
+            
+            <span class="cm">// Obtém streams com DataInputStream/DataOutputStream</span>
+            <span class="ty">DataInputStream</span> entrada = <span class="kw">new</span> <span class="ty">DataInputStream</span>(
+                socket.<span class="fn">getInputStream</span>());
+            <span class="ty">DataOutputStream</span> saida = <span class="kw">new</span> <span class="ty">DataOutputStream</span>(
+                socket.<span class="fn">getOutputStream</span>());
+            
+            <span class="cm">// Lê mensagem do cliente</span>
+            <span class="ty">String</span> mensagem = entrada.<span class="fn">readUTF</span>();
+            System.out.<span class="fn">println</span>(<span class="str">"Recebido: "</span> + mensagem);
+            
+            <span class="cm">// Envia resposta (converte para maiúsculo)</span>
+            saida.<span class="fn">writeUTF</span>(mensagem.<span class="fn">toUpperCase</span>());
+            
+            <span class="cm">// Fecha conexões</span>
+            socket.<span class="fn">close</span>();
+            servidorSocket.<span class="fn">close</span>();
+            
+        } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
+            e.<span class="fn">printStackTrace</span>();
+        }
+    }
+}</pre>
+            </div>
+        </section>
+
+        <!-- Cliente -->
+        <section class="panel" data-key="cliente">
+            <div class="box">
+                <h3>Código do Cliente (conforme Código 5.1 do livro)</h3>
+
+                <pre><span class="kw">import</span> java.io.*;
+<span class="kw">import</span> java.net.*;
+
+<span class="kw">public class</span> <span class="ty">Cliente</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="kw">try</span> {
+            <span class="cm">// Conecta ao servidor</span>
+            <span class="ty">Socket</span> socket = <span class="kw">new</span> <span class="ty">Socket</span>(<span class="str">"127.0.0.1"</span>, <span class="str">54321</span>);
+            
+            <span class="cm">// Obtém stream de saída</span>
+            <span class="ty">DataOutputStream</span> saida = <span class="kw">new</span> <span class="ty">DataOutputStream</span>(
+                socket.<span class="fn">getOutputStream</span>());
+            
+            <span class="cm">// Envia mensagem para o servidor</span>
+            saida.<span class="fn">writeUTF</span>(<span class="str">"rafael"</span>);
+            
+            <span class="cm">// Obtém stream de entrada para ler resposta</span>
+            <span class="ty">DataInputStream</span> entrada = <span class="kw">new</span> <span class="ty">DataInputStream</span>(
+                socket.<span class="fn">getInputStream</span>());
+            
+            <span class="cm">// Lê resposta do servidor</span>
+            <span class="ty">String</span> resposta = entrada.<span class="fn">readUTF</span>();
+            System.out.<span class="fn">println</span>(<span class="str">"Resposta: "</span> + resposta);
+            
+            <span class="cm">// Fecha conexão</span>
+            socket.<span class="fn">close</span>();
+            
         } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
             e.<span class="fn">printStackTrace</span>();
         }
@@ -255,7 +316,7 @@ System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardand
         <!-- Classes -->
         <section class="panel" data-key="classes">
             <div class="box">
-                <h3>Classes Principais</h3>
+                <h3>Classes Principais para Comunicação TCP</h3>
 
                 <table>
                     <thead>
@@ -267,30 +328,27 @@ System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardand
                     <tbody>
                         <tr>
                             <td><code>ServerSocket</code></td>
-                            <td>Escuta em uma porta, aceita conexões</td>
+                            <td>Escuta em uma porta e aceita conexões</td>
                         </tr>
                         <tr>
                             <td><code>Socket</code></td>
-                            <td>Representa conexão com cliente</td>
+                            <td>Representa uma conexão TCP</td>
                         </tr>
                         <tr>
-                            <td><code>InputStream</code></td>
-                            <td>Lê bytes do cliente</td>
+                            <td><code>DataInputStream</code></td>
+                            <td>Lê dados primitivos e strings (readUTF)</td>
                         </tr>
                         <tr>
-                            <td><code>OutputStream</code></td>
-                            <td>Envia bytes para cliente</td>
-                        </tr>
-                        <tr>
-                            <td><code>BufferedReader</code></td>
-                            <td>Lê linhas de texto (wrapper)</td>
-                        </tr>
-                        <tr>
-                            <td><code>PrintWriter</code></td>
-                            <td>Escreve linhas de texto (wrapper)</td>
+                            <td><code>DataOutputStream</code></td>
+                            <td>Escreve dados primitivos e strings (writeUTF)</td>
                         </tr>
                     </tbody>
                 </table>
+
+                <div class="box" style="background:#e0f2fe;border-color:var(--socket);">
+                    <strong>💡 Importante:</strong> Use DataInputStream/DataOutputStream para comunicação de texto
+                    simples. Para enviar objetos Java, use ObjectInputStream/ObjectOutputStream.
+                </div>
             </div>
         </section>
 
@@ -313,25 +371,29 @@ System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardand
 
         // Flow steps
         const stepCodes = [
-            `<span class="cm">// 1. Criar ServerSocket na porta 12345</span>
-<span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>);
-System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardando..."</span>);`,
-            `<span class="cm">// 2. Esperar conexão (bloqueia)</span>
-<span class="ty">Socket</span> cliente = server.<span class="fn">accept</span>();
-<span class="cm">// Só continua quando cliente conectar!</span>`,
-            `<span class="cm">// 3. Obter streams de entrada e saída</span>
-<span class="ty">InputStream</span> is = cliente.<span class="fn">getInputStream</span>();
-<span class="ty">OutputStream</span> os = cliente.<span class="fn">getOutputStream</span>();
+            `<span class="cm">// 1. Servidor: Criar ServerSocket na porta 54321</span>
+<span class="ty">ServerSocket</span> servidorSocket = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">54321</span>);
+System.out.<span class="fn">println</span>(<span class="str">"Servidor aguardando conexões..."</span>);`,
+            `<span class="cm">// 2. Servidor: Esperar conexão (bloqueia)</span>
+<span class="ty">Socket</span> socket = servidorSocket.<span class="fn">accept</span>();
+<span class="cm">// Execução para aqui até um cliente conectar!</span>`,
+            `<span class="cm">// 3. Cliente: Conectar ao servidor</span>
+<span class="ty">Socket</span> socket = <span class="kw">new</span> <span class="ty">Socket</span>(<span class="str">"127.0.0.1"</span>, <span class="str">54321</span>);
+<span class="cm">// Conecta no IP 127.0.0.1 (localhost), porta 54321</span>`,
+            `<span class="cm">// 4. Obter streams para comunicação</span>
+<span class="ty">DataInputStream</span> entrada = <span class="kw">new</span> <span class="ty">DataInputStream</span>(
+    socket.<span class="fn">getInputStream</span>());
+<span class="ty">DataOutputStream</span> saida = <span class="kw">new</span> <span class="ty">DataOutputStream</span>(
+    socket.<span class="fn">getOutputStream</span>());`,
+            `<span class="cm">// 5. Comunicação com writeUTF/readUTF</span>
+<span class="cm">// Cliente envia:</span>
+saida.<span class="fn">writeUTF</span>(<span class="str">"rafael"</span>);
 
-<span class="cm">// Com wrappers para texto:</span>
-<span class="ty">BufferedReader</span> in = <span class="kw">new</span> <span class="ty">BufferedReader</span>(<span class="kw">new</span> <span class="ty">InputStreamReader</span>(is));
-<span class="ty">PrintWriter</span> out = <span class="kw">new</span> <span class="ty">PrintWriter</span>(os, <span class="kw">true</span>);`,
-            `<span class="cm">// 4. Ler e escrever</span>
-<span class="ty">String</span> msg = in.<span class="fn">readLine</span>();  <span class="cm">// Lê linha do cliente</span>
-out.<span class="fn">println</span>(<span class="str">"Resposta"</span>);   <span class="cm">// Envia para cliente</span>`,
-            `<span class="cm">// 5. Fechar conexão</span>
-cliente.<span class="fn">close</span>();
-server.<span class="fn">close</span>();  <span class="cm">// Quando terminar</span>`
+<span class="cm">// Servidor lê:</span>
+<span class="ty">String</span> msg = entrada.<span class="fn">readUTF</span>();
+
+<span class="cm">// Servidor responde:</span>
+saida.<span class="fn">writeUTF</span>(msg.<span class="fn">toUpperCase</span>());`
         ];
 
         document.querySelectorAll('.flow-step').forEach(step => {
@@ -344,11 +406,11 @@ server.<span class="fn">close</span>();  <span class="cm">// Quando terminar</sp
 
         // Quiz
         const quizzes = [
-            { q: 'ServerSocket é usado pelo...', opts: ['Cliente', 'Servidor', 'Ambos'], ans: 1 },
-            { q: 'accept() retorna...', opts: ['void', 'Socket do cliente', 'String'], ans: 1 },
-            { q: 'Para ler texto linha a linha, usamos...', opts: ['InputStream', 'BufferedReader', 'DataInputStream'], ans: 1 },
-            { q: 'PrintWriter com autoflush=true...', opts: ['Fecha automaticamente', 'Envia imediatamente após println', 'Compacta dados'], ans: 1 },
-            { q: 'Se accept() não foi chamado, clientes...', opts: ['Conectam normalmente', 'Recebem erro de conexão', 'Entram em fila'], ans: 2 }
+            { q: 'DataOutputStream.writeUTF() envia...', opts: ['Bytes brutos', 'String codificada em UTF-8', 'Apenas números'], ans: 1 },
+            { q: 'DataInputStream.readUTF() lê...', opts: ['Linha de texto', 'String enviada por writeUTF', 'Arquivo completo'], ans: 1 },
+            { q: 'O método accept() pertence a...', opts: ['Socket', 'ServerSocket', 'DataInputStream'], ans: 1 },
+            { q: 'Para conectar ao servidor, o cliente usa...', opts: ['new ServerSocket()', 'new Socket(ip, porta)', 'accept()'], ans: 1 },
+            { q: '127.0.0.1 é o endereço de...', opts: ['Google', 'localhost (máquina local)', 'Porta padrão'], ans: 1 }
         ];
 
         document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `

@@ -874,20 +874,22 @@ function renderGitHubPanel(chapter) {
     <ul class="gh-repo-list">
       ${repos.map((r) => `
         <li class="gh-repo">
-          <a class="gh-repo-link" href="${r.url}" target="_blank" rel="noopener">${r.name}</a>
+          <a class="gh-repo-link" href="${r.url}" target="_blank" rel="noopener"><img src="images/icon-github.png" alt="" class="gh-icon" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;">${r.name}</a>
         </li>
       `).join("")}
     </ul>
   `;
 
+
+
   const items = model.length
     ? `
       ${isGrouped
-        ? model.map((g) => `
+      ? model.map((g) => `
             <h4 class="gh-repo-group">${g.group}</h4>
             ${renderRepoList(g.repos || [])}
           `).join("")
-        : renderRepoList(model)}
+      : renderRepoList(model)}
     `
     : "<p>Sem repositórios cadastrados para este capítulo.</p>";
 

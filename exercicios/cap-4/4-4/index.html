@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 4.4 — Transações ACID</title>
+    <title>Exercícios 4.4 — Criando Threads</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,40 @@
 
 <body>
     <main>
-        <h3>Exercícios 4.4 — Transações: COMMIT, ROLLBACK e SAVEPOINT</h3>
+        <h3>Exercícios 4.4 — Criando e Executando Threads</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Em ACID, 'Atomicidade' significa que a transação...",
-                options: ["Persiste após falhas", "É indivisível: ou tudo é aplicado, ou nada", "Não interfere em outras transações"],
+                prompt: "Quais são as duas formas de criar threads em Java?",
+                options: ["Usando new Process() ou new Job()", "Extends Thread ou implements Runnable", "Usando synchronized ou volatile"],
                 answerIndex: 1,
-                explanation: "Atomicidade: transação é 'tudo ou nada'. Se algo falhar, todas as operações são desfeitas."
+                explanation: "Threads podem ser criadas herdando a classe Thread ou implementando a interface Runnable."
             },
             {
-                prompt: "Qual comando confirma e persiste as alterações de uma transação?",
-                options: ["ROLLBACK", "COMMIT", "SAVEPOINT"],
+                prompt: "Por que 'implements Runnable' é geralmente preferido?",
+                options: ["É mais rápido", "Permite que a classe herde de outra classe (Java não suporta herança múltipla)", "Usa menos memória"],
                 answerIndex: 1,
-                explanation: "COMMIT persiste as alterações permanentemente. ROLLBACK desfaz. SAVEPOINT cria ponto de retorno."
+                explanation: "Como Java não suporta herança múltipla, usar Runnable permite que sua classe herde de outra classe."
             },
             {
-                prompt: "ROLLBACK TO savepoint_nome faz o quê?",
-                options: ["Confirma até o savepoint", "Desfaz apenas operações após o savepoint", "Remove o savepoint"],
+                prompt: "O que acontece se chamar run() diretamente ao invés de start()?",
+                options: ["A thread executa normalmente", "A tarefa executa na thread atual, sem criar concorrência", "Ocorre um erro de compilação"],
                 answerIndex: 1,
-                explanation: "ROLLBACK TO desfaz apenas as operações após o SAVEPOINT, mantendo as anteriores intactas."
+                explanation: "Chamar run() diretamente executa a tarefa na thread atual. Para criar concorrência, deve-se chamar start()."
+            },
+            {
+                prompt: "O método join() faz o quê?",
+                options: ["Junta duas threads em uma", "Faz a thread atual esperar pelo término de outra thread", "Interrompe uma thread"],
+                answerIndex: 1,
+                explanation: "join() permite que uma thread espere pelo término de outra. Ex: t1.join() faz a thread atual esperar t1 terminar."
+            },
+            {
+                prompt: "O que o método yield() faz?",
+                options: ["Encerra a thread", "Suspende a execução e permite que outra thread de mesma prioridade execute", "Aumenta a prioridade da thread"],
+                answerIndex: 1,
+                explanation: "yield() passa o controle para outra thread de mesma prioridade, permitindo alternância de execução."
             }
         ];
 

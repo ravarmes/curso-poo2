@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 4.1 — Introdução à SQL</title>
+    <title>Exercícios 4.1 — Introdução a Threads</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,28 @@
 
 <body>
     <main>
-        <h3>Exercícios 4.1 — Introdução à SQL e Subconjuntos</h3>
+        <h3>Exercícios 4.1 — Introdução a Threads</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "SQL é uma linguagem...",
-                options: ["Procedural com loops e variáveis", "Declarativa padronizada (ISO/IEC 9075)", "Exclusiva do MySQL"],
+                prompt: "Uma thread é...",
+                options: ["Um processo independente do sistema operacional", "Um fluxo de execução dentro de um processo", "Um tipo de variável em Java"],
                 answerIndex: 1,
-                explanation: "SQL é declarativa e padronizada. Cada SGBD (PostgreSQL, MySQL etc.) pode ter pequenas variações de dialeto."
+                explanation: "Uma thread é um fluxo de execução dentro de um processo. Um mesmo programa pode ter várias threads executando tarefas diferentes."
             },
             {
-                prompt: "Qual subconjunto SQL contém CREATE, ALTER e DROP?",
-                options: ["DML (Data Manipulation Language)", "DDL (Data Definition Language)", "DCL (Data Control Language)"],
+                prompt: "Qual a diferença entre concorrência e paralelismo?",
+                options: ["São sinônimos", "Concorrência é estruturação para múltiplas tarefas; paralelismo é execução simultânea em múltiplos núcleos", "Paralelismo é mais lento que concorrência"],
                 answerIndex: 1,
-                explanation: "DDL define estruturas (tabelas, índices). DML manipula dados. DCL controla permissões."
+                explanation: "Concorrência é a estruturação do programa para lidar com múltiplas tarefas no mesmo intervalo de tempo. Paralelismo é a execução simultânea de tarefas em múltiplos núcleos/CPUs."
             },
             {
-                prompt: "Os comandos GRANT e REVOKE pertencem a qual subconjunto?",
-                options: ["DDL", "DML", "DCL (Data Control Language)"],
-                answerIndex: 2,
-                explanation: "DCL gerencia segurança: GRANT concede permissões, REVOKE remove. ROLE agrupa permissões."
+                prompt: "Qual é o principal objetivo de usar threads em aplicações com GUI?",
+                options: ["Usar menos memória", "Melhorar a responsividade da interface", "Simplificar o código"],
+                answerIndex: 1,
+                explanation: "Em interfaces gráficas, executar tarefas longas na thread da GUI deixa a aplicação 'travada'. Threads melhoram a responsividade."
             }
         ];
 

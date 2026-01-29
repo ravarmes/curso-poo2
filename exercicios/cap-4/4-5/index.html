@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 4.5 — SELECT e WHERE</title>
+    <title>Exercícios 4.5 — Sincronização</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,34 @@
 
 <body>
     <main>
-        <h3>Exercícios 4.5 — Consultas (DQL) e Ordenações</h3>
+        <h3>Exercícios 4.5 — Sincronização de Threads</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Qual cláusula define as condições de filtro em um SELECT?",
-                options: ["ORDER BY", "FROM", "WHERE"],
-                answerIndex: 2,
-                explanation: "WHERE filtra linhas com base em condições. ORDER BY ordena o resultado. FROM define a tabela."
+                prompt: "O que é uma 'condição de corrida' (race condition)?",
+                options: ["Quando duas threads competem por velocidade", "Quando o resultado depende da ordem de execução de threads, podendo gerar valores incorretos", "Quando uma thread termina antes de outra"],
+                answerIndex: 1,
+                explanation: "Condição de corrida ocorre quando múltiplas threads acessam dados compartilhados e o resultado depende da ordem de execução."
             },
             {
-                prompt: "O operador LIKE com '%texto%' busca...",
-                options: ["Valores exatos iguais a 'texto'", "Valores que contenham 'texto' em qualquer posição", "Valores NULL"],
+                prompt: "A palavra-chave 'synchronized' serve para...",
+                options: ["Aumentar a velocidade da thread", "Garantir exclusão mútua - apenas uma thread acessa a seção crítica por vez", "Criar uma nova thread"],
                 answerIndex: 1,
-                explanation: "LIKE com % é curinga para qualquer sequência. Ex: '%Cachoeiro%' encontra 'Rua Cachoeiro 123'."
+                explanation: "synchronized define uma seção crítica. Apenas uma thread pode executar um bloco synchronized no mesmo objeto por vez."
             },
             {
-                prompt: "Para ordenar resultados em ordem decrescente, usa-se...",
-                options: ["ORDER BY coluna ASC", "ORDER BY coluna DESC", "GROUP BY coluna"],
+                prompt: "O método wait() faz o quê?",
+                options: ["Encerra a thread permanentemente", "Libera o lock e coloca a thread em espera até ser notificada", "Aumenta a prioridade da thread"],
                 answerIndex: 1,
-                explanation: "DESC ordena em ordem decrescente. ASC (padrão) ordena em ordem crescente."
+                explanation: "wait() libera o lock do objeto e coloca a thread em espera. Ela será acordada por notify() ou notifyAll()."
+            },
+            {
+                prompt: "Qual método acorda TODAS as threads em espera no monitor?",
+                options: ["notify()", "notifyAll()", "wakeAll()"],
+                answerIndex: 1,
+                explanation: "notifyAll() acorda todas as threads em espera no monitor. notify() acorda apenas uma (escolhida pelo escalonador)."
             }
         ];
 

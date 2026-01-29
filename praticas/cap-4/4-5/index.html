@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Práticas 4.5 — ThreadPool</title>
+    <title>Práticas 4.5 — Sincronização de Threads</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -132,202 +132,182 @@
             color: #94a3b8;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 8px 0;
-            font-size: 0.9rem;
-        }
-
-        th,
-        td {
-            border: 1px solid var(--border);
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background: #f1f5f9;
-        }
-
-        /* Pool viz */
-        .pool-container {
+        /* Race condition viz */
+        .race-demo {
             display: flex;
             gap: 20px;
-            align-items: flex-start;
             padding: 20px;
             background: #f8fafc;
             border-radius: 10px;
-        }
-
-        .thread-pool {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .thread-worker {
-            display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px;
+            flex-wrap: wrap;
+        }
+
+        .counter-box {
+            text-align: center;
+            padding: 20px;
             background: white;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            min-width: 120px;
         }
 
-        .thread-worker.busy {
-            background: #d1fae5;
-            border-color: var(--thread);
+        .counter-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--thread);
         }
 
-        .worker-icon {
-            font-size: 1.2rem;
-        }
-
-        .worker-task {
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .task-queue {
+        .thread-actions {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-        }
-
-        .task-item {
-            padding: 6px 12px;
-            background: #fef3c7;
-            border-radius: 6px;
-            font-size: 0.85rem;
+            gap: 8px;
         }
     </style>
 </head>
 
 <body>
     <main>
-        <h2>Práticas 4.5 — ThreadPool e Executors</h2>
+        <h2>Práticas 4.5 — Sincronização de Threads</h2>
 
         <div class="tabs">
             <button class="tab active" data-key="conceito">Conceito</button>
-            <button class="tab" data-key="tipos">Tipos de Pool</button>
-            <button class="tab" data-key="simulador">Simulador</button>
+            <button class="tab" data-key="race">Race Condition</button>
+            <button class="tab" data-key="synchronized">synchronized</button>
+            <button class="tab" data-key="waitnotify">wait/notify</button>
             <button class="tab" data-key="quiz">Quiz</button>
         </div>
 
         <!-- Conceito -->
         <section class="panel active" data-key="conceito">
             <div class="box">
-                <h3>Por que usar ThreadPool?</h3>
-                <p>Criar threads é <strong>caro</strong>. Um ThreadPool reutiliza threads existentes para executar
-                    múltiplas tarefas.</p>
+                <h3>Por que sincronizar?</h3>
+                <p>Quando múltiplas threads acessam dados compartilhados, podem ocorrer <strong>condições de
+                        corrida</strong>.</p>
 
                 <div class="grid">
                     <div>
-                        <h4>❌ Sem Pool:</h4>
-                        <pre><span class="cm">// Cria nova thread para cada tarefa</span>
-<span class="kw">for</span> (<span class="kw">int</span> i = <span class="str">0</span>; i < <span class="str">1000</span>; i++) {
-    <span class="kw">new</span> <span class="ty">Thread</span>(() -> tarefa()).<span class="fn">start</span>();
-}
-<span class="cm">// 1000 threads criadas! 💀</span></pre>
+                        <h4>❌ Sem Sincronização:</h4>
+                        <pre><span class="cm">// Duas threads incrementando</span>
+<span class="kw">int</span> contador = <span class="str">0</span>;
+
+<span class="cm">// Thread A</span>
+contador++;  <span class="cm">// Lê 0, soma 1, escreve 1</span>
+
+<span class="cm">// Thread B (simultaneamente)</span>
+contador++;  <span class="cm">// Lê 0, soma 1, escreve 1</span>
+
+<span class="cm">// Resultado: 1 (deveria ser 2!)</span></pre>
                     </div>
                     <div>
-                        <h4>✅ Com Pool:</h4>
-                        <pre><span class="ty">ExecutorService</span> pool = 
-    <span class="ty">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="str">10</span>);
-
-<span class="kw">for</span> (<span class="kw">int</span> i = <span class="str">0</span>; i < <span class="str">1000</span>; i++) {
-    pool.<span class="fn">submit</span>(() -> tarefa());
+                        <h4>✅ Com synchronized:</h4>
+                        <pre><span class="kw">synchronized void</span> <span class="fn">incrementar</span>() {
+    contador++;
 }
-<span class="cm">// Apenas 10 threads reutilizadas! ✨</span></pre>
+
+<span class="cm">// Agora apenas uma thread por vez</span>
+<span class="cm">// executa o método</span>
+
+<span class="cm">// Resultado: 2 (correto!)</span></pre>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Tipos -->
-        <section class="panel" data-key="tipos">
+        <!-- Race Condition -->
+        <section class="panel" data-key="race">
             <div class="box">
-                <h3>Tipos de ThreadPool</h3>
+                <h3>Simulação de Race Condition</h3>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Factory</th>
-                            <th>Comportamento</th>
-                            <th>Uso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>newFixedThreadPool(n)</code></td>
-                            <td>Exatamente n threads</td>
-                            <td>Carga previsível</td>
-                        </tr>
-                        <tr>
-                            <td><code>newCachedThreadPool()</code></td>
-                            <td>Cria threads sob demanda, remove ociosas</td>
-                            <td>Muitas tarefas curtas</td>
-                        </tr>
-                        <tr>
-                            <td><code>newSingleThreadExecutor()</code></td>
-                            <td>Apenas 1 thread</td>
-                            <td>Tarefas sequenciais</td>
-                        </tr>
-                        <tr>
-                            <td><code>newScheduledThreadPool(n)</code></td>
-                            <td>Tarefas agendadas/periódicas</td>
-                            <td>Timers, cron</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h4>Ciclo de Vida:</h4>
-                <pre><span class="ty">ExecutorService</span> pool = <span class="ty">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="str">4</span>);
-
-pool.<span class="fn">submit</span>(() -> tarefa1());
-pool.<span class="fn">submit</span>(() -> tarefa2());
-
-pool.<span class="fn">shutdown</span>();  <span class="cm">// Não aceita novas, termina atuais</span>
-pool.<span class="fn">awaitTermination</span>(<span class="str">60</span>, <span class="ty">TimeUnit</span>.SECONDS);</pre>
+                <div class="race-demo">
+                    <div class="counter-box">
+                        <div>Contador</div>
+                        <div class="counter-value" id="counter">0</div>
+                    </div>
+                    <div class="thread-actions">
+                        <button class="btn" id="race-unsafe">❌ Incrementar SEM sync (10 threads)</button>
+                        <button class="btn" id="race-safe">✅ Incrementar COM sync (10 threads)</button>
+                        <button class="btn" id="race-reset">🔄 Reset</button>
+                    </div>
+                    <div>
+                        <p class="note">Clique várias vezes no botão "SEM sync" e observe valores inconsistentes.</p>
+                        <p class="note">Com "COM sync", o resultado é sempre previsível.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Simulador -->
-        <section class="panel" data-key="simulador">
+        <!-- synchronized -->
+        <section class="panel" data-key="synchronized">
             <div class="box">
-                <h3>Simulador de ThreadPool</h3>
+                <h3>Usando synchronized</h3>
 
-                <div class="pool-container">
-                    <div>
-                        <h4>Thread Pool (3 threads)</h4>
-                        <div class="thread-pool" id="thread-pool">
-                            <div class="thread-worker" id="w0"><span class="worker-icon">🧵</span> Worker 0 <span
-                                    class="worker-task">idle</span></div>
-                            <div class="thread-worker" id="w1"><span class="worker-icon">🧵</span> Worker 1 <span
-                                    class="worker-task">idle</span></div>
-                            <div class="thread-worker" id="w2"><span class="worker-icon">🧵</span> Worker 2 <span
-                                    class="worker-task">idle</span></div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4>Fila de Tarefas</h4>
-                        <div class="task-queue" id="task-queue"></div>
-                    </div>
-                </div>
+                <h4>Método synchronized:</h4>
+                <pre><span class="kw">public synchronized void</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) {
+    <span class="kw">if</span> (saldo >= valor) {
+        saldo -= valor;
+    }
+}</pre>
 
-                <div style="margin-top:12px;">
-                    <button class="btn" id="add-task">+ Adicionar Tarefa</button>
-                    <button class="btn" id="add-many">+ Adicionar 5 Tarefas</button>
+                <h4>Bloco synchronized:</h4>
+                <pre><span class="kw">public void</span> <span class="fn">transferir</span>(<span class="ty">Conta</span> destino, <span class="kw">double</span> valor) {
+    <span class="kw">synchronized</span>(this) {
+        <span class="kw">this</span>.saldo -= valor;
+    }
+    <span class="kw">synchronized</span>(destino) {
+        destino.saldo += valor;
+    }
+}</pre>
+
+                <div class="box" style="background:#d1fae5;border-color:var(--thread);">
+                    <strong>💡 Dica:</strong> O bloco synchronized permite sincronizar apenas a seção crítica, não o
+                    método inteiro.
                 </div>
+            </div>
+        </section>
+
+        <!-- wait/notify -->
+        <section class="panel" data-key="waitnotify">
+            <div class="box">
+                <h3>Comunicação entre Threads: wait() e notify()</h3>
+
+                <h4>Padrão Produtor/Consumidor:</h4>
+                <pre><span class="kw">class</span> <span class="ty">Buffer</span> {
+    <span class="kw">private</span> <span class="ty">String</span> dado;
+    <span class="kw">private boolean</span> disponivel = <span class="kw">false</span>;
+
+    <span class="kw">public synchronized void</span> <span class="fn">produzir</span>(<span class="ty">String</span> d) <span class="kw">throws</span> <span class="ty">InterruptedException</span> {
+        <span class="kw">while</span> (disponivel) {
+            <span class="fn">wait</span>();  <span class="cm">// Espera consumir</span>
+        }
+        dado = d;
+        disponivel = <span class="kw">true</span>;
+        <span class="fn">notifyAll</span>();  <span class="cm">// Avisa consumidores</span>
+    }
+
+    <span class="kw">public synchronized</span> <span class="ty">String</span> <span class="fn">consumir</span>() <span class="kw">throws</span> <span class="ty">InterruptedException</span> {
+        <span class="kw">while</span> (!disponivel) {
+            <span class="fn">wait</span>();  <span class="cm">// Espera produzir</span>
+        }
+        disponivel = <span class="kw">false</span>;
+        <span class="fn">notifyAll</span>();  <span class="cm">// Avisa produtores</span>
+        <span class="kw">return</span> dado;
+    }
+}</pre>
+
+                <h4>Métodos importantes:</h4>
+                <ul>
+                    <li><code>wait()</code> - libera o lock e espera ser notificado</li>
+                    <li><code>notify()</code> - acorda uma thread esperando</li>
+                    <li><code>notifyAll()</code> - acorda todas as threads esperando</li>
+                </ul>
             </div>
         </section>
 
         <!-- Quiz -->
         <section class="panel" data-key="quiz">
             <div class="box">
-                <h3>Quiz — ThreadPool</h3>
+                <h3>Quiz — Sincronização</h3>
                 <div id="quiz-items"></div>
             </div>
         </section>
@@ -341,59 +321,50 @@ pool.<span class="fn">awaitTermination</span>(<span class="str">60</span>, <span
             document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
         });
 
-        // Simulador
-        let taskId = 0;
-        let queue = [];
-        let workers = [null, null, null];
+        // Race condition demo
+        let counter = 0;
 
-        function updateUI() {
-            document.getElementById('task-queue').innerHTML =
-                queue.map(t => `<div class="task-item">Tarefa #${t}</div>`).join('');
-
-            workers.forEach((task, i) => {
-                const el = document.getElementById('w' + i);
-                if (task) {
-                    el.classList.add('busy');
-                    el.querySelector('.worker-task').textContent = `Tarefa #${task}`;
-                } else {
-                    el.classList.remove('busy');
-                    el.querySelector('.worker-task').textContent = 'idle';
-                }
-            });
-        }
-
-        function processQueue() {
-            workers.forEach((task, i) => {
-                if (!task && queue.length > 0) {
-                    workers[i] = queue.shift();
-                    // Simula execução
+        document.getElementById('race-unsafe').addEventListener('click', () => {
+            // Simula race condition com delays aleatórios
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const temp = counter;
                     setTimeout(() => {
-                        workers[i] = null;
-                        updateUI();
-                        processQueue();
-                    }, 1000 + Math.random() * 1500);
-                }
-            });
-            updateUI();
-        }
-
-        document.getElementById('add-task').addEventListener('click', () => {
-            queue.push(++taskId);
-            processQueue();
+                        counter = temp + 1;
+                        document.getElementById('counter').textContent = counter;
+                    }, Math.random() * 50);
+                }, Math.random() * 100);
+            }
         });
 
-        document.getElementById('add-many').addEventListener('click', () => {
-            for (let i = 0; i < 5; i++) queue.push(++taskId);
-            processQueue();
+        document.getElementById('race-safe').addEventListener('click', () => {
+            // Simula synchronized (sequencial)
+            let promise = Promise.resolve();
+            for (let i = 0; i < 10; i++) {
+                promise = promise.then(() => {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            counter++;
+                            document.getElementById('counter').textContent = counter;
+                            resolve();
+                        }, 50);
+                    });
+                });
+            }
+        });
+
+        document.getElementById('race-reset').addEventListener('click', () => {
+            counter = 0;
+            document.getElementById('counter').textContent = '0';
         });
 
         // Quiz
         const quizzes = [
-            { q: 'newFixedThreadPool(4) cria...', opts: ['4 threads fixas', '4 threads máximo, cresce sob demanda', 'Infinitas threads'], ans: 0 },
-            { q: 'pool.submit() faz...', opts: ['Cria nova thread', 'Adiciona tarefa à fila do pool', 'Espera tarefa terminar'], ans: 1 },
-            { q: 'shutdown() significa...', opts: ['Para imediatamente', 'Não aceita novas, termina atuais', 'Pausa todas'], ans: 1 },
-            { q: 'CachedThreadPool é melhor para...', opts: ['Tarefas longas', 'Muitas tarefas curtas', 'Tarefas agendadas'], ans: 1 },
-            { q: 'ExecutorService é uma...', opts: ['Classe', 'Interface', 'Annotation'], ans: 1 }
+            { q: 'synchronized garante...', opts: ['Execução paralela', 'Exclusão mútua (uma thread por vez)', 'Maior velocidade'], ans: 1 },
+            { q: 'wait() deve ser chamado dentro de...', opts: ['Qualquer método', 'Um bloco synchronized', 'Um try-catch'], ans: 1 },
+            { q: 'notifyAll() acorda...', opts: ['Uma thread', 'Todas as threads esperando no monitor', 'Nenhuma thread'], ans: 1 },
+            { q: 'Race condition ocorre quando...', opts: ['Threads competem por velocidade', 'Múltiplas threads acessam dados compartilhados sem sincronização', 'Uma thread morre'], ans: 1 },
+            { q: 'O padrão Produtor/Consumidor usa...', opts: ['Apenas synchronized', 'synchronized + wait/notify', 'Apenas notify'], ans: 1 }
         ];
 
         document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `

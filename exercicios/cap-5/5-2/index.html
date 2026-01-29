@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 5.2 — Agregação e GROUP BY</title>
+    <title>Exercícios 5.2 — Tipos de Sockets</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,34 @@
 
 <body>
     <main>
-        <h3>Exercícios 5.2 — Agregação, GROUP BY e HAVING</h3>
+        <h3>Exercícios 5.2 — Tipos de Sockets</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Qual função retorna a quantidade de registros?",
-                options: ["SUM()", "COUNT(*)", "AVG()"],
+                prompt: "Qual protocolo oferece conexão confiável e ordenada?",
+                options: ["UDP", "TCP", "HTTP"],
                 answerIndex: 1,
-                explanation: "COUNT(*) conta linhas. SUM soma valores. AVG calcula média."
+                explanation: "TCP (Transmission Control Protocol) garante entrega ordenada e confiável dos dados, com controle de erros."
             },
             {
-                prompt: "GROUP BY é usado para...",
-                options: ["Ordenar resultados", "Agrupar registros antes de aplicar funções de agregação", "Filtrar linhas individuais"],
+                prompt: "UDP é mais adequado para...",
+                options: ["Transferência de arquivos grandes", "Streaming de vídeo em tempo real e jogos online", "Banco de dados"],
                 answerIndex: 1,
-                explanation: "GROUP BY agrupa por atributo. Cada grupo gera uma linha de resultado com valores agregados."
+                explanation: "UDP é usado quando velocidade é mais importante que confiabilidade, como em streaming e jogos online."
             },
             {
-                prompt: "HAVING filtra...",
-                options: ["Linhas antes da agregação (como WHERE)", "Grupos após a agregação", "Colunas do SELECT"],
+                prompt: "Qual classe Java é usada para criar um servidor TCP?",
+                options: ["DatagramSocket", "ServerSocket", "URLConnection"],
                 answerIndex: 1,
-                explanation: "WHERE filtra ANTES de agrupar. HAVING filtra DEPOIS, com base nos resultados agregados."
+                explanation: "ServerSocket é a classe para criar servidores TCP. DatagramSocket é para UDP."
+            },
+            {
+                prompt: "Para obter streams de um Socket TCP em Java, usamos...",
+                options: ["getReader() e getWriter()", "getInputStream() e getOutputStream()", "openStream()"],
+                answerIndex: 1,
+                explanation: "getInputStream() e getOutputStream() retornam os streams para ler e escrever dados no socket."
             }
         ];
 

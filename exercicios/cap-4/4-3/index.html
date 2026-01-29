@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 4.3 — DML: INSERT, UPDATE, DELETE</title>
+    <title>Exercícios 4.3 — Prioridades de Thread</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,28 @@
 
 <body>
     <main>
-        <h3>Exercícios 4.3 — DML: Inclusão, Exclusão e Alteração</h3>
+        <h3>Exercícios 4.3 — Prioridades e Agendamento de Threads</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Qual comando insere novos registros em uma tabela?",
-                options: ["UPDATE", "INSERT INTO ... VALUES", "DELETE FROM"],
+                prompt: "Qual é o valor de Thread.NORM_PRIORITY?",
+                options: ["1", "5", "10"],
                 answerIndex: 1,
-                explanation: "INSERT INTO tabela (colunas) VALUES (valores) adiciona novas linhas à tabela."
+                explanation: "NORM_PRIORITY = 5 é o padrão. MIN_PRIORITY = 1 e MAX_PRIORITY = 10."
             },
             {
-                prompt: "O que acontece com UPDATE sem cláusula WHERE?",
-                options: ["Nada é alterado", "Apenas o primeiro registro é alterado", "TODOS os registros são alterados"],
-                answerIndex: 2,
-                explanation: "Sem WHERE, UPDATE afeta todas as linhas. Use sempre WHERE para limitar o escopo!"
+                prompt: "O que é 'starvation' (inanição) em threads?",
+                options: ["Quando uma thread termina sua execução", "Quando threads de alta prioridade adiam indefinidamente threads de baixa prioridade", "Quando duas threads compartilham memória"],
+                answerIndex: 1,
+                explanation: "Starvation ocorre quando threads de prioridade alta monopolizam a CPU, impedindo que threads de baixa prioridade executem."
             },
             {
-                prompt: "Qual comando remove registros de uma tabela?",
-                options: ["DROP TABLE", "DELETE FROM ... WHERE", "TRUNCATE apenas"],
+                prompt: "O que é 'time slice' (fatia de tempo)?",
+                options: ["Tempo total de execução de uma thread", "Porção de tempo de CPU que cada thread recebe antes de dar vez a outra", "Tempo de espera em estado BLOCKED"],
                 answerIndex: 1,
-                explanation: "DELETE FROM tabela WHERE condição remove linhas específicas. DROP remove a tabela inteira."
+                explanation: "Time slice é a porção de CPU que cada thread recebe. Quando expira, outra thread pode ser escolhida pelo agendador."
             }
         ];
 

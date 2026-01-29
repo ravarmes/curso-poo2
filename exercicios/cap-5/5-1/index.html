@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 5.1 — JOINs</title>
+    <title>Exercícios 5.1 — Sockets</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,28 @@
 
 <body>
     <main>
-        <h3>Exercícios 5.1 — Junções (JOINs)</h3>
+        <h3>Exercícios 5.1 — Sockets: Conceitos Básicos</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "INNER JOIN retorna...",
-                options: ["Todos os registros de ambas as tabelas", "Apenas registros com correspondência em ambas as tabelas", "Apenas registros sem correspondência"],
+                prompt: "O que é um socket?",
+                options: ["Um tipo de arquivo de configuração", "Um endpoint de comunicação que identifica uma conexão de rede", "Um componente de interface gráfica"],
                 answerIndex: 1,
-                explanation: "INNER JOIN retorna apenas a interseção: registros que têm correspondência nas duas tabelas via PK/FK."
+                explanation: "Socket é um endpoint (ponto de extremidade) que identifica uma conexão de rede, combinando endereço IP e porta."
             },
             {
-                prompt: "LEFT JOIN retorna...",
-                options: ["Todos os registros da tabela à esquerda, com NULL onde não há correspondência à direita", "Apenas registros com correspondência", "Apenas registros da direita"],
-                answerIndex: 0,
-                explanation: "LEFT JOIN mantém todos da esquerda. Sem correspondência à direita, preenche com NULL."
+                prompt: "Quais são os três elementos que identificam um socket?",
+                options: ["Nome, Senha, IP", "Endereço IP, número da porta, protocolo de transporte", "CPU, RAM, HD"],
+                answerIndex: 1,
+                explanation: "Um socket é identificado pelo endereço IP da máquina, número da porta e protocolo (TCP ou UDP)."
             },
             {
-                prompt: "Anti-join (LEFT JOIN + WHERE pk IS NULL) retorna...",
-                options: ["Apenas registros COM correspondência", "Apenas registros SEM correspondência na outra tabela", "Todos os registros"],
+                prompt: "No modelo cliente-servidor, quem inicia a conexão?",
+                options: ["O servidor", "O cliente", "Ambos simultaneamente"],
                 answerIndex: 1,
-                explanation: "Anti-join encontra registros órfãos. Ex: alunos que nunca fizeram reserva."
+                explanation: "O cliente inicia a conexão conectando-se ao servidor, que fica aguardando conexões em uma porta específica."
             }
         ];
 

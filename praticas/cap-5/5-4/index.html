@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Práticas 5.4 — Chat Multi-cliente</title>
+    <title>Práticas 5.4 — Servidor Multi-Cliente</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -70,6 +70,12 @@
             margin: 10px 0;
         }
 
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
         .note {
             color: var(--muted);
             font-size: 0.92rem;
@@ -126,255 +132,239 @@
             color: #94a3b8;
         }
 
-        /* Architecture */
-        .arch-diagram {
+        /* Multi-client diagram */
+        .diagram {
             display: flex;
-            justify-content: center;
             align-items: center;
-            gap: 20px;
-            padding: 20px;
-            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 10px;
         }
 
-        .arch-server {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-            border: 2px solid var(--socket);
+        .server-box {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 30px 40px;
             border-radius: 12px;
-            padding: 20px;
             text-align: center;
+            font-weight: bold;
         }
 
-        .arch-thread {
-            background: #d1fae5;
-            border: 1px solid #059669;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin: 4px;
-            font-size: 0.85rem;
-        }
-
-        .arch-client {
-            background: #f3f4f6;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .arch-arrow {
-            font-size: 1.5rem;
-            color: var(--muted);
-        }
-
-        /* Chat sim */
-        .chat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        .clients-box {
+            display: flex;
+            flex-direction: column;
             gap: 12px;
         }
 
-        .client-box {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-        }
-
-        .client-box h5 {
-            margin: 0 0 8px;
+        .client-item {
+            background: white;
+            border: 2px solid var(--socket);
+            border-radius: 8px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
         }
 
-        .client-msgs {
-            height: 120px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
+        .client-item.connected {
+            background: #e0f2fe;
         }
 
-        .client-input {
-            display: flex;
-            gap: 4px;
-        }
-
-        .client-input input {
-            flex: 1;
-            padding: 6px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .client-input button {
-            padding: 6px 12px;
+        .arrow {
+            font-size: 2rem;
+            color: var(--socket);
         }
     </style>
 </head>
 
 <body>
     <main>
-        <h2>Práticas 5.4 — Chat Multi-cliente com Threads</h2>
+        <h2>Práticas 5.4 — Servidor Multi-Cliente com ThreadSockets</h2>
 
         <div class="tabs">
-            <button class="tab active" data-key="arquitetura">Arquitetura</button>
+            <button class="tab active" data-key="problema">O Problema</button>
+            <button class="tab" data-key="solucao">A Solução</button>
+            <button class="tab" data-key="threadsockets">ThreadSockets</button>
             <button class="tab" data-key="servidor">Servidor</button>
-            <button class="tab" data-key="handler">ClientHandler</button>
-            <button class="tab" data-key="simulador">Simulador</button>
             <button class="tab" data-key="quiz">Quiz</button>
         </div>
 
-        <!-- Arquitetura -->
-        <section class="panel active" data-key="arquitetura">
+        <!-- Problema -->
+        <section class="panel active" data-key="problema">
             <div class="box">
-                <h3>Arquitetura Multi-thread</h3>
+                <h3>O Problema: Um Cliente por Vez</h3>
 
-                <div class="arch-diagram">
-                    <div>
-                        <div class="arch-client">💻 Cliente 1</div>
-                        <div class="arch-client">💻 Cliente 2</div>
-                        <div class="arch-client">💻 Cliente 3</div>
-                    </div>
-                    <div class="arch-arrow">⟷</div>
-                    <div class="arch-server">
-                        <strong>🖥️ Servidor</strong>
-                        <p class="note">Thread por cliente:</p>
-                        <div class="arch-thread">🧵 Handler 1</div>
-                        <div class="arch-thread">🧵 Handler 2</div>
-                        <div class="arch-thread">🧵 Handler 3</div>
+                <p>Um servidor com apenas <code>accept()</code> em loop só atende <strong>um cliente por vez</strong>:
+                </p>
+
+                <pre><span class="cm">// ❌ Problema: servidor sequencial</span>
+<span class="kw">while</span> (<span class="kw">true</span>) {
+    <span class="ty">Socket</span> socket = servidorSocket.<span class="fn">accept</span>();
+    
+    <span class="cm">// Enquanto atende este cliente...</span>
+    <span class="fn">atenderCliente</span>(socket);
+    
+    <span class="cm">// ...outros clientes ficam esperando!</span>
+}</pre>
+
+                <div class="diagram">
+                    <div class="server-box">🖥️ Servidor<br><span class="note" style="color:#e0f2fe">Ocupado com Cliente
+                            1</span></div>
+                    <div class="arrow">⟷</div>
+                    <div class="clients-box">
+                        <div class="client-item connected">💻 Cliente 1 (conectado)</div>
+                        <div class="client-item">💻 Cliente 2 (aguardando...)</div>
+                        <div class="client-item">💻 Cliente 3 (aguardando...)</div>
                     </div>
                 </div>
-
-                <h4>Conceitos-chave:</h4>
-                <ul>
-                    <li><strong>Thread por cliente:</strong> Cada conexão é tratada por uma thread separada</li>
-                    <li><strong>Broadcast:</strong> Mensagem de um cliente é enviada para todos</li>
-                    <li><strong>Lista thread-safe:</strong> Lista de clientes deve ser sincronizada</li>
-                </ul>
             </div>
         </section>
 
-        <!-- Servidor -->
-        <section class="panel" data-key="servidor">
+        <!-- Solução -->
+        <section class="panel" data-key="solucao">
             <div class="box">
-                <h3>Servidor Multi-cliente</h3>
+                <h3>A Solução: Uma Thread por Cliente</h3>
 
-                <pre><span class="kw">public class</span> <span class="ty">ServidorChat</span> {
-    <span class="cm">// Lista de todos os clientes conectados</span>
-    <span class="kw">private static</span> <span class="ty">List</span>&lt;<span class="ty">ClientHandler</span>&gt; clientes = 
-        <span class="ty">Collections</span>.<span class="fn">synchronizedList</span>(<span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;());
+                <p>Cada novo cliente é atendido por uma <strong>Thread separada</strong>:</p>
+
+                <pre><span class="cm">// ✅ Solução: servidor multi-thread</span>
+<span class="kw">while</span> (<span class="kw">true</span>) {
+    <span class="ty">Socket</span> socket = servidorSocket.<span class="fn">accept</span>();
     
-    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) <span class="kw">throws</span> <span class="ty">IOException</span> {
-        <span class="ty">ServerSocket</span> server = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">12345</span>);
-        System.out.<span class="fn">println</span>(<span class="str">"Chat iniciado na porta 12345"</span>);
-        
-        <span class="kw">while</span> (<span class="kw">true</span>) {
-            <span class="ty">Socket</span> socket = server.<span class="fn">accept</span>();
-            
-            <span class="cm">// Cria handler e inicia thread</span>
-            <span class="ty">ClientHandler</span> handler = <span class="kw">new</span> <span class="ty">ClientHandler</span>(socket, clientes);
-            clientes.<span class="fn">add</span>(handler);
-            
-            <span class="kw">new</span> <span class="ty">Thread</span>(handler).<span class="fn">start</span>();
-        }
-    }
+    <span class="cm">// Cria thread para atender o cliente</span>
+    <span class="ty">ThreadSockets</span> thread = <span class="kw">new</span> <span class="ty">ThreadSockets</span>(socket);
+    thread.<span class="fn">start</span>();
     
-    <span class="cm">// Envia mensagem para todos os clientes</span>
-    <span class="kw">public static void</span> <span class="fn">broadcast</span>(<span class="ty">String</span> msg) {
-        <span class="kw">synchronized</span>(clientes) {
-            <span class="kw">for</span> (<span class="ty">ClientHandler</span> c : clientes) {
-                c.<span class="fn">enviar</span>(msg);
-            }
-        }
-    }
+    <span class="cm">// Loop continua aceitando novos clientes imediatamente!</span>
 }</pre>
+
+                <div class="diagram" style="flex-wrap:wrap;">
+                    <div class="server-box">🖥️ Servidor<br><span class="note" style="color:#e0f2fe">Aceita
+                            conexões</span></div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span class="arrow">→</span>
+                            <div class="client-item connected">🧵 Thread 1 ⟷ 💻 Cliente 1</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span class="arrow">→</span>
+                            <div class="client-item connected">🧵 Thread 2 ⟷ 💻 Cliente 2</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span class="arrow">→</span>
+                            <div class="client-item connected">🧵 Thread 3 ⟷ 💻 Cliente 3</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Handler -->
-        <section class="panel" data-key="handler">
+        <!-- ThreadSockets -->
+        <section class="panel" data-key="threadsockets">
             <div class="box">
-                <h3>ClientHandler (Thread por Cliente)</h3>
+                <h3>Classe ThreadSockets (conforme Código 5.6 do livro)</h3>
 
-                <pre><span class="kw">class</span> <span class="ty">ClientHandler</span> <span class="kw">implements</span> <span class="ty">Runnable</span> {
-    <span class="kw">private</span> <span class="ty">Socket</span> socket;
-    <span class="kw">private</span> <span class="ty">PrintWriter</span> out;
-    <span class="kw">private</span> <span class="ty">String</span> nome;
+                <pre><span class="kw">import</span> java.io.*;
+<span class="kw">import</span> java.net.*;
+
+<span class="kw">public class</span> <span class="ty">ThreadSockets</span> <span class="kw">extends</span> <span class="ty">Thread</span> {
     
-    <span class="kw">public</span> <span class="ty">ClientHandler</span>(<span class="ty">Socket</span> socket) {
+    <span class="kw">private</span> <span class="ty">Socket</span> socket;
+    
+    <span class="kw">public</span> <span class="ty">ThreadSockets</span>(<span class="ty">Socket</span> socket) {
         <span class="kw">this</span>.socket = socket;
     }
     
     <span class="ann">@Override</span>
     <span class="kw">public void</span> <span class="fn">run</span>() {
         <span class="kw">try</span> {
-            <span class="ty">BufferedReader</span> in = <span class="kw">new</span> <span class="ty">BufferedReader</span>(
-                <span class="kw">new</span> <span class="ty">InputStreamReader</span>(socket.<span class="fn">getInputStream</span>()));
-            out = <span class="kw">new</span> <span class="ty">PrintWriter</span>(socket.<span class="fn">getOutputStream</span>(), <span class="kw">true</span>);
+            <span class="cm">// Obtém streams para comunicação</span>
+            <span class="ty">DataInputStream</span> entrada = <span class="kw">new</span> <span class="ty">DataInputStream</span>(
+                socket.<span class="fn">getInputStream</span>());
+            <span class="ty">DataOutputStream</span> saida = <span class="kw">new</span> <span class="ty">DataOutputStream</span>(
+                socket.<span class="fn">getOutputStream</span>());
             
-            <span class="cm">// Primeira mensagem = nome</span>
-            nome = in.<span class="fn">readLine</span>();
-            <span class="ty">ServidorChat</span>.<span class="fn">broadcast</span>(nome + <span class="str">" entrou no chat!"</span>);
-            
-            <span class="ty">String</span> msg;
-            <span class="kw">while</span> ((msg = in.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
-                <span class="ty">ServidorChat</span>.<span class="fn">broadcast</span>(nome + <span class="str">": "</span> + msg);
+            <span class="cm">// Loop de comunicação com o cliente</span>
+            <span class="kw">while</span> (<span class="kw">true</span>) {
+                <span class="ty">String</span> mensagem = entrada.<span class="fn">readUTF</span>();
+                
+                <span class="kw">if</span> (mensagem.<span class="fn">equalsIgnoreCase</span>(<span class="str">"sair"</span>)) {
+                    <span class="kw">break</span>;
+                }
+                
+                <span class="cm">// Processa e responde</span>
+                saida.<span class="fn">writeUTF</span>(mensagem.<span class="fn">toUpperCase</span>());
             }
+            
+            socket.<span class="fn">close</span>();
+            
         } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
-            <span class="cm">// Cliente desconectou</span>
+            e.<span class="fn">printStackTrace</span>();
         }
     }
-    
-    <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="ty">String</span> msg) {
-        out.<span class="fn">println</span>(msg);
-    }
 }</pre>
+
+                <div class="box" style="background:#e0f2fe;border-color:var(--socket);">
+                    <strong>💡 Características:</strong>
+                    <ul style="margin:8px 0;">
+                        <li>Estende <code>Thread</code></li>
+                        <li>Recebe o Socket no construtor</li>
+                        <li>Toda lógica de comunicação está no método <code>run()</code></li>
+                        <li>Usa <code>DataInputStream</code>/<code>DataOutputStream</code></li>
+                    </ul>
+                </div>
             </div>
         </section>
 
-        <!-- Simulador -->
-        <section class="panel" data-key="simulador">
+        <!-- Servidor -->
+        <section class="panel" data-key="servidor">
             <div class="box">
-                <h3>Simulador de Chat Multi-cliente</h3>
+                <h3>Servidor Multi-Cliente (conforme Código 5.5 do livro)</h3>
 
-                <div class="chat-grid">
-                    <div class="client-box">
-                        <h5>💻 Alice</h5>
-                        <div class="client-msgs" id="msgs-alice"></div>
-                        <div class="client-input">
-                            <input type="text" id="input-alice" placeholder="Mensagem...">
-                            <button class="btn" data-user="alice">→</button>
-                        </div>
-                    </div>
-                    <div class="client-box">
-                        <h5>💻 Bruno</h5>
-                        <div class="client-msgs" id="msgs-bruno"></div>
-                        <div class="client-input">
-                            <input type="text" id="input-bruno" placeholder="Mensagem...">
-                            <button class="btn" data-user="bruno">→</button>
-                        </div>
-                    </div>
-                    <div class="client-box">
-                        <h5>💻 Carla</h5>
-                        <div class="client-msgs" id="msgs-carla"></div>
-                        <div class="client-input">
-                            <input type="text" id="input-carla" placeholder="Mensagem...">
-                            <button class="btn" data-user="carla">→</button>
-                        </div>
-                    </div>
-                </div>
+                <pre><span class="kw">import</span> java.io.*;
+<span class="kw">import</span> java.net.*;
+
+<span class="kw">public class</span> <span class="ty">ServidorMultiCliente</span> {
+    
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="kw">try</span> {
+            <span class="ty">ServerSocket</span> servidorSocket = <span class="kw">new</span> <span class="ty">ServerSocket</span>(<span class="str">54321</span>);
+            System.out.<span class="fn">println</span>(<span class="str">"Servidor iniciado na porta 54321"</span>);
+            
+            <span class="kw">while</span> (<span class="kw">true</span>) {
+                <span class="cm">// Aceita conexão</span>
+                <span class="ty">Socket</span> socket = servidorSocket.<span class="fn">accept</span>();
+                System.out.<span class="fn">println</span>(<span class="str">"Novo cliente conectado!"</span>);
+                
+                <span class="cm">// Cria thread para atender o cliente</span>
+                <span class="ty">ThreadSockets</span> thread = <span class="kw">new</span> <span class="ty">ThreadSockets</span>(socket);
+                thread.<span class="fn">start</span>();
+                
+                <span class="cm">// Volta imediatamente para aceitar próximo cliente</span>
+            }
+            
+        } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
+            e.<span class="fn">printStackTrace</span>();
+        }
+    }
+}</pre>
+
+                <h4>Fluxo de Execução:</h4>
+                <ol>
+                    <li>Servidor cria ServerSocket na porta 54321</li>
+                    <li>Entra em loop infinito com <code>accept()</code></li>
+                    <li>Para cada cliente: cria <code>ThreadSockets</code> e chama <code>start()</code></li>
+                    <li>Thread cuida da comunicação; servidor volta a aceitar</li>
+                </ol>
             </div>
         </section>
 
         <!-- Quiz -->
         <section class="panel" data-key="quiz">
             <div class="box">
-                <h3>Quiz — Chat Multi-cliente</h3>
+                <h3>Quiz — Servidor Multi-Cliente</h3>
                 <div id="quiz-items"></div>
             </div>
         </section>
@@ -388,47 +378,13 @@
             document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
         });
 
-        // Simulador
-        const users = ['alice', 'bruno', 'carla'];
-        const names = { alice: 'Alice', bruno: 'Bruno', carla: 'Carla' };
-        const colors = { alice: '#3b82f6', bruno: '#10b981', carla: '#f59e0b' };
-
-        function broadcast(sender, msg) {
-            users.forEach(user => {
-                const container = document.getElementById('msgs-' + user);
-                const div = document.createElement('div');
-                div.style.margin = '4px 0';
-                div.innerHTML = `<strong style="color:${colors[sender]}">${names[sender]}:</strong> ${msg}`;
-                container.appendChild(div);
-                container.scrollTop = container.scrollHeight;
-            });
-        }
-
-        document.querySelectorAll('[data-user]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const user = btn.dataset.user;
-                const input = document.getElementById('input-' + user);
-                const msg = input.value.trim();
-                if (msg) {
-                    broadcast(user, msg);
-                    input.value = '';
-                }
-            });
-        });
-
-        users.forEach(user => {
-            document.getElementById('input-' + user).addEventListener('keypress', e => {
-                if (e.key === 'Enter') document.querySelector(`[data-user="${user}"]`).click();
-            });
-        });
-
         // Quiz
         const quizzes = [
-            { q: 'Para suportar múltiplos clientes, o servidor usa...', opts: ['Múltiplos ServerSockets', 'Uma thread por cliente', 'accept() em loop apenas'], ans: 1 },
-            { q: 'Collections.synchronizedList garante...', opts: ['Performance', 'Thread-safety', 'Ordenação'], ans: 1 },
-            { q: 'Broadcast significa...', opts: ['Enviar para um cliente', 'Enviar para todos os clientes', 'Fechar conexões'], ans: 1 },
-            { q: 'ClientHandler implements Runnable porque...', opts: ['É mais rápido', 'Cada cliente roda em thread separada', 'Java exige'], ans: 1 },
-            { q: 'Se a lista de clientes não for synchronized...', opts: ['Nada acontece', 'Pode haver race condition', 'Conexões falham'], ans: 1 }
+            { q: 'Por que usar threads para múltiplos clientes?', opts: ['Usa menos memória', 'Permite atender vários clientes simultaneamente', 'É mais simples de programar'], ans: 1 },
+            { q: 'A classe ThreadSockets do livro estende...', opts: ['Runnable', 'Thread', 'Socket'], ans: 1 },
+            { q: 'Onde fica a lógica de comunicação na ThreadSockets?', opts: ['No construtor', 'No método run()', 'No método main()'], ans: 1 },
+            { q: 'Após criar a ThreadSockets, chamamos...', opts: ['run()', 'start()', 'execute()'], ans: 1 },
+            { q: 'O servidor volta a aceitar conexões...', opts: ['Após o cliente desconectar', 'Imediatamente após criar a thread', 'Nunca'], ans: 1 }
         ];
 
         document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `

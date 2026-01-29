@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 5.3 — Subconsultas</title>
+    <title>Exercícios 5.3 — Sockets TCP</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,28 @@
 
 <body>
     <main>
-        <h3>Exercícios 5.3 — Subconsultas e Operadores Lógicos</h3>
+        <h3>Exercícios 5.3 — Sockets TCP: Fluxo de Comunicação</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Uma subconsulta é...",
-                options: ["Uma tabela temporária permanente", "Um SELECT aninhado usado como filtro ou origem de dados", "Um tipo de JOIN"],
+                prompt: "O método accept() do ServerSocket faz o quê?",
+                options: ["Envia dados para o cliente", "Bloqueia até um cliente se conectar e retorna um Socket", "Fecha o servidor"],
                 answerIndex: 1,
-                explanation: "Subconsulta é SELECT dentro de outro SELECT. O interno executa primeiro e alimenta o externo."
+                explanation: "accept() é um método bloqueante: ele para a execução até que um cliente se conecte, então retorna um Socket para comunicação."
             },
             {
-                prompt: "O operador IN na subconsulta verifica se...",
-                options: ["O valor existe na lista retornada pela subconsulta", "A subconsulta retorna exatamente um valor", "Há pelo menos um registro"],
-                answerIndex: 0,
-                explanation: "IN compara com uma lista de valores. EXISTS verifica existência. Escalares usam = ou >."
+                prompt: "Por que o método accept() é considerado 'bloqueante'?",
+                options: ["Porque usa muita memória", "Porque a execução para até que um evento (conexão) ocorra", "Porque causa deadlock"],
+                answerIndex: 1,
+                explanation: "Métodos bloqueantes suspendem a execução da thread até que uma condição seja satisfeita (neste caso, uma conexão)."
             },
             {
-                prompt: "AND, OR e NOT são usados para...",
-                options: ["Ordenar resultados", "Combinar condições lógicas no WHERE", "Agrupar registros"],
+                prompt: "Qual é a principal desvantagem de um servidor com apenas accept() em loop simples?",
+                options: ["Consome muita CPU", "Só pode atender um cliente por vez", "Não funciona em Windows"],
                 answerIndex: 1,
-                explanation: "AND: ambas verdadeiras. OR: pelo menos uma verdadeira. NOT: inverte a condição."
+                explanation: "Um servidor sequencial com accept() só atende um cliente por vez. É necessário usar threads para múltiplos clientes."
             }
         ];
 

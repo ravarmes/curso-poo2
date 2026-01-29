@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 4.2 — Estados de Thread</title>
+    <title>Exercícios 4.7 — Multithreading com GUI</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,34 +114,34 @@
 
 <body>
     <main>
-        <h3>Exercícios 4.2 — Estados de Thread: Ciclo de Vida</h3>
+        <h3>Exercícios 4.7 — Multithreading com GUI</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Uma thread recém-criada com 'new Thread(...)' está em qual estado?",
-                options: ["RUNNABLE", "NEW (Novo)", "TERMINATED"],
+                prompt: "O que é a JavaFX Application Thread?",
+                options: ["Uma thread secundária para cálculos", "A thread principal responsável por atualizar a interface gráfica", "Uma thread para acessar banco de dados"],
                 answerIndex: 1,
-                explanation: "No estado NEW, a thread foi criada mas ainda não foi iniciada com start()."
+                explanation: "A JavaFX Application Thread é responsável por renderizar e atualizar todos os elementos da interface gráfica."
             },
             {
-                prompt: "Após chamar start(), a thread entra em qual estado?",
-                options: ["BLOCKED", "RUNNABLE (Executável)", "WAITING"],
+                prompt: "O que acontece se você tentar atualizar um Label diretamente de uma thread secundária?",
+                options: ["Funciona normalmente", "Pode causar IllegalStateException ou comportamento inesperado", "A aplicação fecha automaticamente"],
                 answerIndex: 1,
-                explanation: "No estado RUNNABLE, a thread está pronta para executar ou executando, dependendo do agendador do SO."
+                explanation: "Componentes JavaFX devem ser atualizados apenas pela JavaFX Application Thread. Violações podem causar erros."
             },
             {
-                prompt: "Uma thread que chamou wait() está em qual estado?",
-                options: ["TERMINATED", "RUNNABLE", "WAITING (Espera)"],
-                answerIndex: 2,
-                explanation: "WAITING significa que a thread aguarda indefinidamente por outra thread. Usa-se wait() ou join() para entrar nesse estado."
+                prompt: "Para atualizar a GUI a partir de uma thread secundária, usamos...",
+                options: ["Thread.sleep()", "Platform.runLater()", "synchronized"],
+                answerIndex: 1,
+                explanation: "Platform.runLater() enfileira código para ser executado na JavaFX Application Thread de forma segura."
             },
             {
-                prompt: "Thread.sleep(ms) coloca a thread em qual estado?",
-                options: ["TIMED_WAITING (Espera Cronometrada)", "BLOCKED", "NEW"],
-                answerIndex: 0,
-                explanation: "TIMED_WAITING é para espera por tempo determinado. sleep(ms) e wait(ms) colocam a thread nesse estado."
+                prompt: "Qual é a assinatura correta de Platform.runLater()?",
+                options: ["Platform.runLater(String s)", "Platform.runLater(Runnable r)", "Platform.runLater(int time)"],
+                answerIndex: 1,
+                explanation: "runLater recebe um Runnable, que pode ser passado como expressão lambda: Platform.runLater(() -> { ... })"
             }
         ];
 

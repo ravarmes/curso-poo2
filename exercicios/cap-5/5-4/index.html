@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Exercícios 5.4 — VIEWs</title>
+    <title>Exercícios 5.4 — Sockets Java</title>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -114,28 +114,34 @@
 
 <body>
     <main>
-        <h3>Exercícios 5.4 — Criando Visões (VIEW)</h3>
+        <h3>Exercícios 5.4 — Sockets Java: Classes Principais</h3>
         <div id="ex-list"></div>
     </main>
     <script>
         const QUESTIONS = [
             {
-                prompt: "Uma VIEW é...",
-                options: ["Uma cópia física dos dados", "Uma tabela virtual definida por SELECT", "Um índice de busca"],
+                prompt: "Para enviar texto via socket usando UTF, qual classe usamos?",
+                options: ["PrintWriter", "DataOutputStream", "FileWriter"],
                 answerIndex: 1,
-                explanation: "VIEW é um SELECT salvo no banco. Funciona como tabela virtual, sem armazenar dados físicos."
+                explanation: "DataOutputStream possui o método writeUTF() para enviar strings codificadas em UTF-8."
             },
             {
-                prompt: "Qual vantagem de usar VIEWs?",
-                options: ["Aumenta espaço em disco", "Simplifica consultas complexas e favorece reutilização", "Substitui todas as tabelas"],
+                prompt: "O método writeUTF() pertence a qual classe?",
+                options: ["BufferedWriter", "DataOutputStream", "ObjectOutputStream"],
                 answerIndex: 1,
-                explanation: "VIEWs encapsulam JOINs complexos, apresentam colunas legíveis e podem restringir acesso."
+                explanation: "DataOutputStream.writeUTF() envia strings. DataInputStream.readUTF() recebe."
             },
             {
-                prompt: "Para consultar uma VIEW, usa-se...",
-                options: ["SELECT ... FROM nome_view como se fosse tabela", "CREATE VIEW novamente", "INSERT INTO view"],
-                answerIndex: 0,
-                explanation: "VIEWs são consultadas com SELECT normal. O usuário não precisa conhecer os JOINs internos."
+                prompt: "Para enviar objetos Java via socket, usamos...",
+                options: ["DataOutputStream", "ObjectOutputStream", "PrintStream"],
+                answerIndex: 1,
+                explanation: "ObjectOutputStream serializa objetos Java e os envia via socket. O objeto deve implementar Serializable."
+            },
+            {
+                prompt: "O que um objeto deve implementar para ser enviado via ObjectOutputStream?",
+                options: ["Runnable", "Serializable", "Comparable"],
+                answerIndex: 1,
+                explanation: "A interface Serializable marca classes cujos objetos podem ser convertidos em bytes para transmissão."
             }
         ];
 
