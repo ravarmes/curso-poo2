@@ -717,6 +717,12 @@ sudo apt install openjdk-25-jdk</pre>
           <li>Windows: <code>winget install Apache Maven</code> ou <code>choco install maven</code></li>
           <li>macOS: <code>brew install maven</code></li>
         </ul>
+        <h4>Chocolatey no Windows</h4>
+        <p>Abra o PowerShell como Administrador e execute:</p>
+        <pre>Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))</pre>
+        <p>Depois:</p>
+        <pre>choco --version
+choco install maven -y</pre>
         <p class="note">Se o projeto tiver <strong>Maven Wrapper</strong> (<code>mvnw</code>), você pode usar <code>./mvnw</code> sem instalar o Maven globalmente.</p>
 
         <p><strong>5. Criar projeto JavaFX</strong></p>
