@@ -76,6 +76,12 @@
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
 
     .note {
       color: var(--muted);
@@ -107,6 +113,47 @@
     .feedback.err {
       color: #dc2626;
     }
+    .diagram { display: flex; flex-direction: column; gap: 16px; align-items: center; padding: 10px; }
+    .diagram-row { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .diagram-col { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    .diagram-box {
+      border-radius: 14px;
+      padding: 14px 18px;
+      min-width: 140px;
+      text-align: center;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      transition: transform .15s ease, box-shadow .15s ease, outline-color .15s ease;
+      outline: 3px solid transparent;
+    }
+    .diagram-box:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.12); }
+    .diagram-box.selected { outline-color: #11182722; }
+    .stage { background: linear-gradient(135deg,#60a5fa,#2563eb); }
+    .scene { background: linear-gradient(135deg,#34d399,#059669); }
+    .layout { background: linear-gradient(135deg,#f59e0b,#d97706); }
+    .node { background: linear-gradient(135deg,#a78bfa,#7c3aed); }
+    .arrow {
+      font-size: 20px;
+      color: #6b7280;
+      font-weight: 800;
+    }
+    .code-box {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0b1220;
+      color: #e2e8f0;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .code-line { display: block; padding: 2px 6px; border-radius: 6px; }
+    .code-line.hl { background: #1f2937; }
+    .legend { color: var(--muted); font-size: .92rem; }
 
     pre {
       background: #1e293b;
@@ -291,6 +338,7 @@
 
     <div class="tabs">
       <button class="tab active" data-key="hierarquia">Hierarquia</button>
+      <button class="tab" data-key="mapa">Mapa Visual</button>
       <button class="tab" data-key="componentes">Componentes</button>
       <button class="tab" data-key="simulador">Simulador</button>
       <button class="tab" data-key="quiz">Quiz</button>
@@ -446,6 +494,49 @@
         <div id="quiz-items"></div>
       </div>
     </section>
+
+    <section class="panel" data-key="mapa">
+      <div class="box">
+        <h3>Mapa Visual — Stage, Scene, Layout e Nodes</h3>
+        <div class="grid2">
+          <div>
+            <div class="diagram">
+              <div class="diagram-col">
+                <div class="diagram-box stage" data-part="stage">Stage</div>
+                <div class="arrow">↓</div>
+                <div class="diagram-box scene" data-part="scene">Scene</div>
+                <div class="arrow">↓</div>
+                <div class="diagram-box layout" data-part="layout">Layout</div>
+              </div>
+              <div class="diagram-row">
+                <div class="arrow">↘</div>
+                <div class="arrow">↓</div>
+                <div class="arrow">↙</div>
+              </div>
+              <div class="diagram-row">
+                <div class="diagram-box node" data-part="button">Button</div>
+                <div class="diagram-box node" data-part="label">Label</div>
+              </div>
+              <div class="diagram-row">
+                <div class="diagram-box node" data-part="textfield">TextField</div>
+              </div>
+            </div>
+            <p class="legend">Clique em um bloco para destacar o trecho de código correspondente.</p>
+          </div>
+          <div class="code-box" id="code-box">
+<span class="code-line" data-part="stage">Stage stage = new Stage();</span>
+<span class="code-line" data-part="stage">stage.setTitle("Janela JavaFX");</span>
+<span class="code-line" data-part="label">Label label = new Label("Olá!");</span>
+<span class="code-line" data-part="button">Button button = new Button("Click");</span>
+<span class="code-line" data-part="textfield">TextField textField = new TextField();</span>
+<span class="code-line" data-part="layout">VBox root = new VBox(10, label, button, textField);</span>
+<span class="code-line" data-part="scene">Scene scene = new Scene(root, 360, 220);</span>
+<span class="code-line" data-part="stage">stage.setScene(scene);</span>
+<span class="code-line" data-part="stage">stage.show();</span>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -541,6 +632,16 @@ boolean marcado = cb.isSelected();</pre>`
         const correct = quizzes[qi].ans === oi;
         fb.textContent = correct ? 'Correto! ✅' : 'Incorreto. Tente novamente.';
         fb.className = 'feedback ' + (correct ? 'ok' : 'err');
+      });
+    });
+    document.querySelectorAll('.diagram-box').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.diagram-box').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        const part = el.dataset.part;
+        document.querySelectorAll('#code-box .code-line').forEach(line => {
+          line.classList.toggle('hl', line.dataset.part === part);
+        });
       });
     });
   </script>

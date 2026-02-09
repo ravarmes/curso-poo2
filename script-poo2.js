@@ -656,7 +656,8 @@ function renderPracticesSectioned(sections = []) {
       <div class="subsection">
         <h4>${s.id} — ${s.title}</h4>
         ${s.practiceUrl
-      ? `<iframe class="practice-iframe" src="${s.practiceUrl}" width="100%" style="border:0;" loading="lazy"></iframe>`
+      ? `<p class="open-practice"><a href="${s.practiceUrl}" target="_blank" rel="noopener">Abrir prática em nova aba</a></p>
+         <iframe class="practice-iframe" src="${s.practiceUrl}" width="100%" style="border:0;" loading="lazy"></iframe>`
       : `<div>${s.practice || "<p>Sem prática definida.</p>"}</div>`}
       </div>
     `).join("")}

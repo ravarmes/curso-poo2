@@ -298,6 +298,19 @@ body {
   display: block;
 }
 
+.open-practice {
+  margin: 4px 0 10px;
+}
+.open-practice a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+.open-practice a:hover {
+  text-decoration: underline;
+}
+
 .gh-repo-list {
   list-style: none;
   padding: 0;
