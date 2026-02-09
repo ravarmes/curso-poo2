@@ -109,6 +109,18 @@ body {
   opacity: 0.7;
 }
 
+.install-link {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+}
+.install-link a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.install-link a:hover {
+  text-decoration: underline;
+}
+
 /* Navegação: apenas capítulos */
 .chapters ul {
   list-style: none;
@@ -297,6 +309,27 @@ body {
 .panel.active {
   display: block;
 }
+
+.callout {
+  border-left: 6px solid var(--accent);
+  padding: 15px;
+  margin: 0 0 18px 0;
+  border-radius: 8px;
+  background: #f5f9ff;
+}
+.callout-primary { border-left-color: var(--accent); }
+.callout h2 { margin: 0 0 8px 0; font-size: 1.1rem; }
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0 16px;
+  background: var(--surface);
+}
+.card h2 { margin-top: 0; font-size: 1.1rem; }
+.card h3 { margin-bottom: 6px; }
+.card h4 { margin: 10px 0 6px; }
 
 .open-practice {
   margin: 4px 0 10px;

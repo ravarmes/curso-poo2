@@ -623,6 +623,134 @@ const chapters = [
       },
     ],
   },
+  {
+    id: "install",
+    title: "Instalação",
+    fullTitle: "Guia de Instalação e Configuração",
+    hidden: true,
+    installHtml: `
+      <div class="callout callout-primary">
+        <h2>📘 Por que usamos Java 8 no início?</h2>
+        <p>No começo da disciplina, o foco é <strong>programar</strong> sem gastar tempo com configurações.</p>
+        <p>Usaremos <strong>Java 8</strong> com <strong>NetBeans 8.2</strong>, onde <strong>JavaFX já vem integrado</strong>. Depois avançamos para Java moderno com <strong>VS Code</strong> e <strong>Maven</strong>.</p>
+        <p><strong>Resumo:</strong> primeiro aprendemos a programar; depois, trabalhamos em ambiente profissional.</p>
+      </div>
+
+      <div class="card">
+        <h2>1️⃣ Guia 1 — Java 8 Simples (fase inicial)</h2>
+        <h3>NetBeans + Java 8 (JavaFX embutido)</h3>
+        <p><strong>Objetivo:</strong> permitir começar com JavaFX imediatamente, com configuração mínima.</p>
+
+        <h4>🧰 Ferramentas utilizadas</h4>
+        <ul>
+          <li>Sistema: Linux Ubuntu ou Windows (64 bits)</li>
+          <li>Java: JDK 8u111</li>
+          <li>JavaFX: já incluso no Java 8</li>
+          <li>IDE: NetBeans 8.2</li>
+        </ul>
+
+        <h4>📥 Arquivo para download</h4>
+        <p><strong>Linux:</strong><br>
+          <a href="https://archive.org/download/jdk-8u111-nb-8_2/jdk-8u111-nb-8_2-linux-x64.sh" target="_blank" rel="noopener">https://archive.org/download/jdk-8u111-nb-8_2/jdk-8u111-nb-8_2-linux-x64.sh</a>
+        </p>
+        <p><strong>Windows:</strong><br>
+          <a href="https://archive.org/download/jdk-8u111-nb-8_2/jdk-8u111-nb-8_2-windows-x64.exe" target="_blank" rel="noopener">https://archive.org/download/jdk-8u111-nb-8_2/jdk-8u111-nb-8_2-windows-x64.exe</a>
+        </p>
+
+        <h4>🪜 Passo a passo (Linux)</h4>
+        <ol>
+          <li>Abra o terminal e acesse a pasta dos downloads.</li>
+          <li>Torne o instalador executável:</li>
+        </ol>
+        <pre>chmod +x jdk-8u111-nb-8_2-linux-x64.sh</pre>
+        <ol start="3">
+          <li>Execute o instalador:</li>
+        </ol>
+        <pre>./jdk-8u111-nb-8_2-linux-x64.sh</pre>
+        <p>Siga as instruções, mantendo as opções padrão.</p>
+
+        <h4>🪜 Passo a passo (Windows)</h4>
+        <ol>
+          <li>Execute o arquivo .exe baixado.</li>
+          <li>Siga o assistente de instalação e aceite os termos.</li>
+          <li>Mantenha as opções padrão.</li>
+        </ol>
+
+        <h4>▶️ Criando o primeiro projeto</h4>
+        <p>No NetBeans:</p>
+        <pre>File → New Project → JavaFX → JavaFX Application</pre>
+        <p class="note"><strong>Observação:</strong> este ambiente é apenas para a fase inicial.</p>
+      </div>
+
+      <div class="card">
+        <h2>2️⃣ Guia 2 — Java 25 Profissional (fase avançada)</h2>
+        <h3>Visual Studio Code + Maven + JavaFX</h3>
+        <p><strong>Objetivo:</strong> trabalhar com Java moderno e ferramentas alinhadas ao mercado.</p>
+
+        <h4>🧰 Ferramentas utilizadas</h4>
+        <ul>
+          <li>Sistema: Linux Ubuntu</li>
+          <li>Java: OpenJDK 25</li>
+          <li>IDE: Visual Studio Code</li>
+          <li>Gerenciador de projeto: Maven</li>
+        </ul>
+
+        <h4>🪜 Passo a passo</h4>
+        <p><strong>1. Instalar o Java 25</strong></p>
+        <pre>sudo apt update
+sudo apt install openjdk-25-jdk</pre>
+
+        <p><strong>2. Instalar o Visual Studio Code</strong></p>
+        <pre>sudo snap install code --classic</pre>
+
+        <p><strong>3. Instalar extensões no VS Code</strong></p>
+        <ul>
+          <li>Extension Pack for Java</li>
+          <li>Maven for Java</li>
+        </ul>
+
+        <p><strong>4. Instalar o Maven (CLI)</strong></p>
+        <p>Em Ubuntu/Debian:</p>
+        <pre>sudo apt install maven</pre>
+        <p>Alternativas:</p>
+        <ul>
+          <li>Windows: <code>winget install Apache Maven</code> ou <code>choco install maven</code></li>
+          <li>macOS: <code>brew install maven</code></li>
+        </ul>
+        <p class="note">Se o projeto tiver <strong>Maven Wrapper</strong> (<code>mvnw</code>), você pode usar <code>./mvnw</code> sem instalar o Maven globalmente.</p>
+
+        <p><strong>5. Criar projeto JavaFX</strong></p>
+        <ol>
+          <li>Abra o VS Code</li>
+          <li>Pressione <code>Ctrl + Shift + P</code></li>
+          <li>Selecione <code>Create Java Project</code></li>
+          <li>Escolha <code>JavaFX (Provided by Maven for Java)</code></li>
+        </ol>
+
+        <p><strong>6. Executar o projeto</strong></p>
+        <pre>mvn javafx:run</pre>
+
+        <p class="note">Nesta fase, o foco é trabalhar com ferramentas profissionais e projetos estruturados.</p>
+      </div>
+
+      <div class="card">
+        <h2>3️⃣ Instalar o Scene Builder (Gluon)</h2>
+        <p><strong>Windows (MSI):</strong><br>
+          <a href="https://gluonhq.com/products/scene-builder/thanks/?dl=https://download2.gluonhq.com/scenebuilder/25.0.0/install/win/SceneBuilder-25.0.0.msi" target="_blank" rel="noopener">SceneBuilder-25.0.0.msi</a>
+        </p>
+        <p><strong>Linux (Ubuntu/Debian — .deb):</strong><br>
+          <a href="https://gluonhq.com/products/scene-builder/thanks/?dl=https://download2.gluonhq.com/scenebuilder/25.0.0/install/linux/SceneBuilder-25.0.0.deb" target="_blank" rel="noopener">SceneBuilder-25.0.0.deb</a>
+        </p>
+        <h4>🪜 Instalação no Ubuntu/Debian</h4>
+        <p>Baixe o arquivo .deb e instale com:</p>
+        <pre>sudo apt install ./SceneBuilder-25.0.0.deb</pre>
+        <p>Ou:</p>
+        <pre>sudo dpkg -i SceneBuilder-25.0.0.deb
+sudo apt -f install</pre>
+        <p class="note">Em distribuições baseadas em RPM (Fedora/RHEL), use o pacote .rpm e <code>sudo dnf install SceneBuilder-25.0.0.rpm</code>. No laboratório (Ubuntu), utilize o pacote .deb.</p>
+      </div>
+    `,
+  },
 ];
 
 const layoutEl = document.getElementById("layout");
@@ -636,6 +764,7 @@ const collapseBtn = document.getElementById("collapse-sidebar-btn");
 function buildSidebar() {
   const frag = document.createDocumentFragment();
   chapters.forEach((ch) => {
+    if (ch.hidden) return;
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = `#${ch.id}`;
@@ -910,7 +1039,7 @@ function renderChapter(chapterId) {
     a.classList.toggle("active", isActive);
   });
 
-  const tabs = [
+  let tabs = [
     { key: "infographics", label: "Infográficos" },
     { key: "contents", label: "Conteúdos" },
     { key: "slides", label: "Slides" },
@@ -920,6 +1049,9 @@ function renderChapter(chapterId) {
     { key: "practices", label: "Práticas" },
     { key: "github", label: "GitHub" },
   ];
+  if (chapter.id === "install") {
+    tabs = [{ key: "contents", label: "Instalação" }];
+  }
 
   const toolbar = document.createElement("div");
   toolbar.className = "toolbar";
@@ -979,7 +1111,9 @@ function renderChapter(chapterId) {
         p.innerHTML = "<h3>Práticas</h3><p>Práticas serão adicionadas em breve.</p>";
       }
     } else if (key === "contents") {
-      if (chapter.contentUrl) {
+      if (chapter.id === "install" && chapter.installHtml) {
+        p.innerHTML = chapter.installHtml;
+      } else if (chapter.contentUrl) {
         p.innerHTML = `
           <h3>Conteúdos</h3>
           <iframe class="content-iframe" src="${chapter.contentUrl}" width="100%" style="border:0;" loading="lazy"></iframe>
